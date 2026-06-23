@@ -1,0 +1,170 @@
+[
+  {
+    "input": {
+      "name": "Port Scan Detected",
+      "duration": 0.5,
+      "packet_count": 320,
+      "byte_count": 3200,
+      "dest_port_range": 512,
+      "unique_dest_ports": 150,
+      "failed_connections": 140,
+      "syn_ratio": 0.92,
+      "iat_mean": 0.01,
+      "flow_bps": 1200,
+      "login_attempts": 0
+    },
+    "label": "True Positive",
+    "confidence": 69.6,
+    "severity": "HIGH",
+    "tp_prob": 69.6,
+    "fp_prob": 30.4,
+    "action": "ESCALATE"
+  },
+  {
+    "input": {
+      "name": "Brute Force SSH",
+      "duration": 45,
+      "packet_count": 1200,
+      "byte_count": 12000,
+      "dest_port_range": 2,
+      "unique_dest_ports": 1,
+      "failed_connections": 280,
+      "syn_ratio": 0.55,
+      "iat_mean": 0.3,
+      "flow_bps": 3000,
+      "login_attempts": 250
+    },
+    "label": "True Positive",
+    "confidence": 100.0,
+    "severity": "CRITICAL",
+    "tp_prob": 100.0,
+    "fp_prob": 0.0,
+    "action": "ESCALATE"
+  },
+  {
+    "input": {
+      "name": "C2 Beacon Activity",
+      "duration": 1800,
+      "packet_count": 48,
+      "byte_count": 2400,
+      "dest_port_range": 1,
+      "unique_dest_ports": 1,
+      "failed_connections": 0,
+      "syn_ratio": 0.15,
+      "iat_mean": 30.1,
+      "flow_bps": 80,
+      "login_attempts": 0
+    },
+    "label": "True Positive",
+    "confidence": 100.0,
+    "severity": "CRITICAL",
+    "tp_prob": 100.0,
+    "fp_prob": 0.0,
+    "action": "ESCALATE"
+  },
+  {
+    "input": {
+      "name": "Data Exfiltration",
+      "duration": 120,
+      "packet_count": 3200,
+      "byte_count": 8500000,
+      "dest_port_range": 2,
+      "unique_dest_ports": 1,
+      "failed_connections": 1,
+      "syn_ratio": 0.12,
+      "iat_mean": 0.8,
+      "flow_bps": 72000,
+      "login_attempts": 0
+    },
+    "label": "True Positive",
+    "confidence": 100.0,
+    "severity": "CRITICAL",
+    "tp_prob": 100.0,
+    "fp_prob": 0.0,
+    "action": "ESCALATE"
+  },
+  {
+    "input": {
+      "name": "Normal Web Traffic",
+      "duration": 2.1,
+      "packet_count": 22,
+      "byte_count": 8500,
+      "dest_port_range": 3,
+      "unique_dest_ports": 2,
+      "failed_connections": 0,
+      "syn_ratio": 0.2,
+      "iat_mean": 1.5,
+      "flow_bps": 4000,
+      "login_attempts": 0
+    },
+    "label": "False Positive",
+    "confidence": 87.9,
+    "severity": "LOW",
+    "tp_prob": 12.1,
+    "fp_prob": 87.9,
+    "action": "SUPPRESS"
+  },
+  {
+    "input": {
+      "name": "Admin Tool - FP",
+      "duration": 5.0,
+      "packet_count": 60,
+      "byte_count": 15000,
+      "dest_port_range": 4,
+      "unique_dest_ports": 3,
+      "failed_connections": 1,
+      "syn_ratio": 0.25,
+      "iat_mean": 2.0,
+      "flow_bps": 3000,
+      "login_attempts": 2
+    },
+    "label": "False Positive",
+    "confidence": 75.9,
+    "severity": "LOW",
+    "tp_prob": 24.1,
+    "fp_prob": 75.9,
+    "action": "SUPPRESS"
+  },
+  {
+    "input": {
+      "name": "SQL Injection Attempt",
+      "duration": 8,
+      "packet_count": 450,
+      "byte_count": 9000,
+      "dest_port_range": 2,
+      "unique_dest_ports": 1,
+      "failed_connections": 120,
+      "syn_ratio": 0.6,
+      "iat_mean": 0.2,
+      "flow_bps": 2800,
+      "login_attempts": 100
+    },
+    "label": "True Positive",
+    "confidence": 96.1,
+    "severity": "CRITICAL",
+    "tp_prob": 96.1,
+    "fp_prob": 3.9,
+    "action": "ESCALATE"
+  },
+  {
+    "input": {
+      "name": "Lateral Movement",
+      "duration": 900,
+      "packet_count": 80,
+      "byte_count": 4000,
+      "dest_port_range": 2,
+      "unique_dest_ports": 1,
+      "failed_connections": 2,
+      "syn_ratio": 0.18,
+      "iat_mean": 28,
+      "flow_bps": 120,
+      "login_attempts": 0
+    },
+    "label": "True Positive",
+    "confidence": 100.0,
+    "severity": "CRITICAL",
+    "tp_prob": 100.0,
+    "fp_prob": 0.0,
+    "action": "ESCALATE"
+  }
+]

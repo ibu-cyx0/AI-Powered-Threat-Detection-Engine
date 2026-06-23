@@ -1,0 +1,29 @@
+{
+  "accuracy": 100.0,
+  "roc_auc": 1.0,
+  "cv_auc": 1.0,
+  "cv_std": 0.0,
+  "feature_importance": {
+    "duration_sec": 0.193559758942636,
+    "src_bytes": 0.027964273946229183,
+    "dst_bytes": 0.04113660405747002,
+    "packet_count": 0.08878429898774366,
+    "failed_logins": 0.02416310693703294,
+    "distinct_dst_ports": 0.048415324203655616,
+    "connection_rate": 0.24180178512307238,
+    "alert_priority": 0.3337381960135995,
+    "protocol": 0.00011417724482424664,
+    "time_of_day": 0.00032247454373655844
+  },
+  "confusion_matrix": [
+    [
+      200,
+      0
+    ],
+    [
+      0,
+      200
+    ]
+  ],
+  "fp_reduced_pct": 100.0
+}

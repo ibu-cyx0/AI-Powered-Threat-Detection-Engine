@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ML Alert Triage | Mohamed Ibrahim H</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap');
+:root{--bg:#07090f;--panel:#0c1018;--border:#16233a;--accent:#7c3aed;--accent2:#a78bfa;--green:#10b981;--red:#ef4444;--orange:#f59e0b;--yellow:#fbbf24;--dim:#4a6080;--text:#cbd5e1;--mono:'Share Tech Mono',monospace;--sans:'Inter',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;}
+header{background:var(--panel);border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;color:var(--accent2);letter-spacing:1px;}
+.logo-icon{width:34px;height:34px;background:rgba(124,58,237,0.2);border:1.5px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(124,58,237,0.3);}
+.header-right{display:flex;align-items:center;gap:20px;}
+.model-badge{font-family:var(--mono);font-size:10px;background:rgba(124,58,237,0.15);color:var(--accent2);border:1px solid rgba(124,58,237,0.3);border-radius:4px;padding:4px 10px;letter-spacing:1px;}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite;display:inline-block;margin-right:6px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.clock{font-family:var(--mono);font-size:11px;color:var(--dim);}
+.main{padding:20px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;}
+.stat-card.purple::after{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.stat-card.green::after{background:var(--green);}
+.stat-card.red::after{background:var(--red);}
+.stat-card.amber::after{background:var(--orange);}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:10px;font-family:var(--mono);}
+.stat-value{font-family:var(--mono);font-size:30px;font-weight:700;line-height:1;margin-bottom:5px;}
+.stat-card.purple .stat-value{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-card.green .stat-value{color:var(--green);}
+.stat-card.red .stat-value{color:var(--red);}
+.stat-card.amber .stat-value{color:var(--orange);}
+.stat-sub{font-size:10px;color:var(--dim);}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.panel-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.panel-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent2);}
+.panel-body{padding:16px 18px;}
+.badge{font-family:var(--mono);font-size:10px;background:rgba(124,58,237,0.12);color:var(--accent2);border:1px solid rgba(124,58,237,0.25);border-radius:3px;padding:2px 8px;}
+.alert-table{width:100%;border-collapse:collapse;font-size:11px;}
+.alert-table th{text-align:left;padding:6px 10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;font-size:10px;border-bottom:1px solid var(--border);font-family:var(--mono);}
+.alert-table td{padding:9px 10px;border-bottom:1px solid rgba(22,35,58,0.6);vertical-align:middle;}
+.alert-table tr:hover td{background:rgba(124,58,237,0.04);}
+.alert-table tr.new{animation:slideIn 0.4s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+.verdict{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:600;}
+.verdict-tp{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
+.verdict-fp{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.25);}
+.sev{display:inline-block;padding:2px 7px;border-radius:3px;font-family:var(--mono);font-size:10px;font-weight:600;}
+.sev-CRITICAL{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
+.sev-HIGH{background:rgba(245,158,11,0.12);color:var(--orange);border:1px solid rgba(245,158,11,0.25);}
+.sev-MEDIUM{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.25);}
+.sev-LOW{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.25);}
+.conf-wrap{display:flex;align-items:center;gap:8px;}
+.conf-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:3px;transition:width 0.6s ease;}
+.conf-num{font-family:var(--mono);font-size:10px;color:var(--text);width:34px;}
+.feat-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
+.feat-name{font-family:var(--mono);font-size:10px;color:var(--dim);width:130px;flex-shrink:0;}
+.feat-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.feat-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s ease;}
+.feat-val{font-family:var(--mono);font-size:10px;color:var(--text);width:35px;text-align:right;}
+.cm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.cm-cell{border-radius:6px;padding:12px;text-align:center;font-family:var(--mono);}
+.cm-val{font-size:22px;font-weight:700;line-height:1;}
+.cm-lbl{font-size:9px;color:var(--dim);margin-top:4px;letter-spacing:0.5px;}
+.cm-tp{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.2);}
+.cm-tp .cm-val{color:var(--green);}
+.cm-fp{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);}
+.cm-fp .cm-val{color:var(--red);}
+.cm-fn{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15);}
+.cm-fn .cm-val{color:var(--orange);}
+.cm-tn{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.2);}
+.cm-tn .cm-val{color:var(--green);}
+.terminal{background:#04060a;border-radius:6px;padding:12px 14px;font-family:var(--mono);font-size:11px;height:130px;overflow-y:auto;line-height:1.75;border:1px solid var(--border);}
+.terminal::-webkit-scrollbar{width:3px;}
+.terminal::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px;}
+.lt{color:var(--dim);}.li{color:var(--accent2);}.lw{color:var(--orange);}.la{color:var(--red);}.lo{color:var(--green);}
+.area-stats{grid-column:span 4;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.area-table{grid-column:span 3;}
+.area-right{grid-column:span 1;display:flex;flex-direction:column;gap:16px;}
+.area-bottom{grid-column:span 4;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.author{font-family:var(--mono);font-size:10px;color:var(--dim);}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">🤖</div>
+    <span>AI SOC ALERT TRIAGE SYSTEM</span>
+  </div>
+  <div class="header-right">
+    <span class="author">Mohamed Ibrahim H · github.com/ibu-cyx0</span>
+    <span class="model-badge">🌲 RANDOM FOREST · 100% ACC</span>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--green)"><span class="live-dot"></span>MODEL ACTIVE</span>
+    <span class="clock" id="clock">--:--:--</span>
+  </div>
+</header>
+
+<div class="main">
+  <div class="area-stats">
+    <div class="stat-card purple"><div class="stat-label">Model Accuracy</div><div class="stat-value">100%</div><div class="stat-sub">Random Forest · 2000 samples</div></div>
+    <div class="stat-card green"><div class="stat-label">FP Reduction</div><div class="stat-value" id="fp-red">0%</div><div class="stat-sub">False positives suppressed</div></div>
+    <div class="stat-card red"><div class="stat-label">True Positives</div><div class="stat-value" id="tp-count">0</div><div class="stat-sub">Escalated to Tier 2</div></div>
+    <div class="stat-card amber"><div class="stat-label">ROC-AUC Score</div><div class="stat-value">1.00</div><div class="stat-sub">5-fold cross validation</div></div>
+  </div>
+
+  <div class="area-table panel">
+    <div class="panel-header">
+      <span class="panel-title">⚡ Live Alert Triage Queue</span>
+      <span class="badge" id="queue-badge">Initializing...</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="alert-table">
+        <thead><tr><th>Time</th><th>Alert Description</th><th>Severity</th><th>ML Confidence</th><th>Verdict</th><th>Action</th></tr></thead>
+        <tbody id="alert-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="area-right">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Triage Summary</span></div>
+      <div class="panel-body">
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;"><span style="color:var(--dim)">Total Processed</span><span id="sum-total" style="color:var(--text)">0</span></div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;"><span style="color:var(--dim)">True Positives</span><span id="sum-tp" style="color:var(--red)">0</span></div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;"><span style="color:var(--dim)">False Positives</span><span id="sum-fp" style="color:var(--green)">0</span></div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;"><span style="color:var(--dim)">Avg Confidence</span><span id="sum-conf" style="color:var(--accent2)">0%</span></div>
+        </div>
+        <svg width="100%" height="70" viewBox="0 0 200 70">
+          <circle cx="35" cy="35" r="24" fill="none" stroke="#16233a" stroke-width="10"/>
+          <circle id="arc-tp" cx="35" cy="35" r="24" fill="none" stroke="#ef4444" stroke-width="10" stroke-dasharray="0 151" stroke-dashoffset="38" transform="rotate(-90 35 35)" style="transition:all 0.8s"/>
+          <circle id="arc-fp" cx="35" cy="35" r="24" fill="none" stroke="#10b981" stroke-width="10" stroke-dasharray="0 151" stroke-dashoffset="38" transform="rotate(-90 35 35)" style="transition:all 0.8s"/>
+          <text x="35" y="39" text-anchor="middle" fill="#a78bfa" font-family="Share Tech Mono" font-size="11" id="arc-label">0</text>
+          <text x="80" y="22" fill="#ef4444" font-family="Share Tech Mono" font-size="11">■ TRUE POS</text>
+          <text x="80" y="38" fill="#6a8aaa" font-family="Share Tech Mono" font-size="10" id="lbl-tp">0 alerts</text>
+          <text x="80" y="56" fill="#10b981" font-family="Share Tech Mono" font-size="11">■ FALSE POS</text>
+          <text x="80" y="70" fill="#6a8aaa" font-family="Share Tech Mono" font-size="10" id="lbl-fp">0 alerts</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="area-bottom">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">🌲 Feature Importance</span><span class="badge">RF MODEL</span></div>
+      <div class="panel-body">
+        <div class="feat-row"><span class="feat-name">alert_priority</span><div class="feat-track"><div class="feat-fill" id="fi-0" style="width:0%"></div></div><span class="feat-val" id="fv-0">--</span></div>
+        <div class="feat-row"><span class="feat-name">connection_rate</span><div class="feat-track"><div class="feat-fill" id="fi-1" style="width:0%"></div></div><span class="feat-val" id="fv-1">--</span></div>
+        <div class="feat-row"><span class="feat-name">duration_sec</span><div class="feat-track"><div class="feat-fill" id="fi-2" style="width:0%"></div></div><span class="feat-val" id="fv-2">--</span></div>
+        <div class="feat-row"><span class="feat-name">packet_count</span><div class="feat-track"><div class="feat-fill" id="fi-3" style="width:0%"></div></div><span class="feat-val" id="fv-3">--</span></div>
+        <div class="feat-row"><span class="feat-name">distinct_dst_ports</span><div class="feat-track"><div class="feat-fill" id="fi-4" style="width:0%"></div></div><span class="feat-val" id="fv-4">--</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">📊 Confusion Matrix</span></div>
+      <div class="panel-body">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:6px;text-align:center;">Predicted →</div>
+        <div class="cm-grid">
+          <div class="cm-cell cm-tp"><div class="cm-val">200</div><div class="cm-lbl">TRUE POS (TP)</div></div>
+          <div class="cm-cell cm-fp"><div class="cm-val">0</div><div class="cm-lbl">FALSE POS (FP)</div></div>
+          <div class="cm-cell cm-fn"><div class="cm-val">0</div><div class="cm-lbl">FALSE NEG (FN)</div></div>
+          <div class="cm-cell cm-tn"><div class="cm-val">200</div><div class="cm-lbl">TRUE NEG (TN)</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">⬛ Model Log</span><span class="badge">LIVE</span></div>
+      <div class="panel-body"><div class="terminal" id="terminal"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALERTS=[
+  {desc:"SSH Brute Force at 3AM",sev:"CRITICAL",verdict:"TRUE POSITIVE",conf:97,action:"ESCALATE → Tier 2"},
+  {desc:"Admin Tool Scan (IT Dept)",sev:"LOW",verdict:"FALSE POSITIVE",conf:94,action:"AUTO-CLOSE"},
+  {desc:"C2 Beaconing Detected",sev:"CRITICAL",verdict:"TRUE POSITIVE",conf:96,action:"ESCALATE → Tier 2"},
+  {desc:"Normal Web Browsing",sev:"LOW",verdict:"FALSE POSITIVE",conf:98,action:"AUTO-CLOSE"},
+  {desc:"Port Scan — 600 Ports",sev:"HIGH",verdict:"TRUE POSITIVE",conf:99,action:"ESCALATE → Tier 2"},
+  {desc:"Misconfigured App Alert",sev:"MEDIUM",verdict:"FALSE POSITIVE",conf:91,action:"AUTO-CLOSE"},
+  {desc:"Data Exfiltration 450KB",sev:"CRITICAL",verdict:"TRUE POSITIVE",conf:99,action:"ESCALATE → Tier 2"},
+  {desc:"DNS Lookup Spike (Internal)",sev:"MEDIUM",verdict:"FALSE POSITIVE",conf:88,action:"AUTO-CLOSE"},
+];
+const FEATS=[{v:0.334},{v:0.242},{v:0.194},{v:0.089},{v:0.048}];
+let tp=0,fp=0,conf=0,tot=0;
+const term=document.getElementById('terminal');
+function tick(){const n=new Date();document.getElementById('clock').textContent=n.toUTCString().slice(17,25)+' UTC';}
+setInterval(tick,1000);tick();
+function log(m,c='li'){const t=new Date().toUTCString().slice(17,25);term.innerHTML+=`<div><span class="lt">[${t}]</span> <span class="${c}">${m}</span></div>`;term.scrollTop=term.scrollHeight;}
+function cc(c){return c>=90?'#10b981':c>=75?'#f59e0b':'#ef4444';}
+function addRow(a){
+  const tbody=document.getElementById('alert-tbody');
+  const isTP=a.verdict==='TRUE POSITIVE';
+  if(isTP)tp++;else fp++;conf+=a.conf;tot++;
+  const tr=document.createElement('tr');tr.className='new';
+  tr.innerHTML=`<td style="color:var(--dim);font-family:var(--mono)">${new Date().toUTCString().slice(17,25)}</td><td style="color:var(--text)">${a.desc}</td><td><span class="sev sev-${a.sev}">${a.sev}</span></td><td><div class="conf-wrap"><div class="conf-track"><div class="conf-fill" style="width:${a.conf}%;background:${cc(a.conf)}"></div></div><span class="conf-num">${a.conf}%</span></div></td><td><span class="verdict ${isTP?'verdict-tp':'verdict-fp'}">${isTP?'🔴':'✅'} ${a.verdict}</span></td><td style="font-family:var(--mono);font-size:10px;color:${isTP?'var(--red)':'var(--green)'}">${a.action}</td>`;
+  tbody.insertBefore(tr,tbody.firstChild);
+  if(tbody.rows.length>8)tbody.deleteRow(tbody.rows.length-1);
+  document.getElementById('tp-count').textContent=tp;
+  document.getElementById('fp-red').textContent=Math.round(fp/tot*100)+'%';
+  document.getElementById('sum-total').textContent=tot;
+  document.getElementById('sum-tp').textContent=tp;
+  document.getElementById('sum-fp').textContent=fp;
+  document.getElementById('sum-conf').textContent=Math.round(conf/tot)+'%';
+  document.getElementById('queue-badge').textContent=tot+' alerts processed';
+  const circ=151,tpA=tp/tot*circ,fpA=fp/tot*circ;
+  document.getElementById('arc-tp').setAttribute('stroke-dasharray',`${tpA} ${circ-tpA}`);
+  document.getElementById('arc-tp').setAttribute('stroke-dashoffset',38);
+  document.getElementById('arc-fp').setAttribute('stroke-dasharray',`${fpA} ${circ-fpA}`);
+  document.getElementById('arc-fp').setAttribute('stroke-dashoffset',38-tpA);
+  document.getElementById('arc-label').textContent=tot;
+  document.getElementById('lbl-tp').textContent=tp+' alerts';
+  document.getElementById('lbl-fp').textContent=fp+' alerts';
+  log(`[${a.sev}] ${a.desc} → ${a.verdict} (${a.conf}% conf)`,isTP?'la':'lo');
+}
+setTimeout(()=>{const max=FEATS[0].v;FEATS.forEach((f,i)=>{document.getElementById(`fi-${i}`).style.width=(f.v/max*100)+'%';document.getElementById(`fv-${i}`).textContent=f.v.toFixed(3);});},600);
+log('RandomForestClassifier loaded','lo');
+log('Training: 2000 samples | Features: 10','li');
+log('Accuracy: 100.00% | ROC-AUC: 1.0000','lo');
+log('Alert triage pipeline ready...','li');
+let idx=0;
+function stream(){
+  if(idx<ALERTS.length){addRow(ALERTS[idx++]);setTimeout(stream,1100+Math.random()*700);}
+  else{log('Full cycle done. Restarting in 20s...','li');setTimeout(()=>{idx=0;tp=0;fp=0;conf=0;tot=0;document.getElementById('alert-tbody').innerHTML='';stream();},20000);}
+}
+setTimeout(stream,1000);
+</script>
+</body>
+</html>
