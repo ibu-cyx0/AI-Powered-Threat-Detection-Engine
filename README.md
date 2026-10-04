@@ -130,11 +130,11 @@ FP Reduction   : 100%
 
 ### Top Feature Importances
 ```
-alert_priority       ████████████████  0.334
-connection_rate      ██████████        0.242
-duration_sec         ████████          0.194
-packet_count         ████              0.089
-distinct_dst_ports   ██                0.048
+alert_priority       █████████████     0.336
+connection_rate      █████████         0.237
+duration_sec         ███████           0.186
+packet_count         ███               0.092
+distinct_dst_ports   ██                0.060
 ```
 
 ---
