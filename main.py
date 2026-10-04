@@ -4,9 +4,8 @@ Author: Mohamed Ibrahim H
 """
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
-from model.train import train
-from model.predict import load_model, batch_predict, DEMO_ALERTS
-
+from train import train
+from predict import load_model, batch_predict, DEMO_ALERTS
 def main():
     print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -26,7 +25,7 @@ def main():
 ║  ✓  ROC-AUC Score    : {metrics['roc_auc']}                         ║
 ║  ✓  FP Reduction     : {metrics['fp_reduced_pct']}%                          ║
 ║  ✓  Alerts Triaged   : {len(results)} (TP:{tp} | FP:{fp})                   ║
-║  ✓  Dashboard        : dashboard/index.html                 ║
+║  ✓  Dashboard        : /index.html                 ║
 ╚══════════════════════════════════════════════════════════════╝
     """)
 
