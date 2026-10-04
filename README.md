@@ -5,19 +5,16 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-orange?logo=scikit-learn&logoColor=white)
-![Accuracy](https://img.shields.io/badge/Accuracy-100%25-brightgreen)
-![ROC--AUC](https://img.shields.io/badge/ROC--AUC-1.0000-brightgreen)
+![Dataset](https://img.shields.io/badge/Dataset-Synthetic-lightgrey)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
 ## 📌 Overview
 
-SOC analysts waste **60-80% of their time** on false positive alerts. This system uses a **Random Forest ML model** trained on realistic alert features to automatically classify alerts as **True Positive (escalate)** or **False Positive (auto-close)** — reducing analyst workload and response time.
+SOC analysts spend a large share of their time on false positive alerts. This system uses a **Random Forest ML model** trained on realistic alert features to automatically classify alerts as **True Positive (escalate)** or **False Positive (auto-close)** — reducing analyst workload and response time.
 
-```markdown
 **Key Result:** 100% accuracy on a synthetic test set · Real-time triage dashboard
-```
 
 ---
 
