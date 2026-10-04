@@ -8,7 +8,7 @@ import pandas as pd
 from datetime import datetime, timezone
 
 MODEL_DIR = os.path.dirname(__file__)
-DATA_DIR  = os.path.join(MODEL_DIR, "..", "data")
+DATA_DIR = MODEL_DIR
 
 FEATURES = ["duration_sec","src_bytes","dst_bytes","packet_count",
             "failed_logins","distinct_dst_ports","connection_rate",
