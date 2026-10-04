@@ -14,10 +14,10 @@ from sklearn.metrics import (classification_report, confusion_matrix,
                              accuracy_score, roc_auc_score)
 import pickle
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from data.generate_dataset import generate_dataset
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from generate_dataset import generate_dataset
 
-DATA_DIR  = os.path.join(os.path.dirname(__file__), "..", "data")
+DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.dirname(__file__)
 
 FEATURES = ["duration_sec","src_bytes","dst_bytes","packet_count",
@@ -96,7 +96,7 @@ def train():
     with open(os.path.join(DATA_DIR, "model_metrics.json"), "w") as f:
         json.dump(metrics, f, indent=2)
 
-    print(f"\n[✓] Model saved → model/model.pkl")
+    print(f"\n[✓] Model saved → model.pkl")
     print(f"[✓] FP Reduction: {metrics['fp_reduced_pct']}%")
     return clf, scaler, metrics
 
