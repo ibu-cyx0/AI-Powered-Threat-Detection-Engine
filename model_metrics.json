@@ -4,16 +4,16 @@
   "cv_auc": 1.0,
   "cv_std": 0.0,
   "feature_importance": {
-    "duration_sec": 0.193559758942636,
-    "src_bytes": 0.027964273946229183,
-    "dst_bytes": 0.04113660405747002,
-    "packet_count": 0.08878429898774366,
-    "failed_logins": 0.02416310693703294,
-    "distinct_dst_ports": 0.048415324203655616,
-    "connection_rate": 0.24180178512307238,
-    "alert_priority": 0.3337381960135995,
-    "protocol": 0.00011417724482424664,
-    "time_of_day": 0.00032247454373655844
+    "duration_sec": 0.18632385214774153,
+    "src_bytes": 0.022726690796140703,
+    "dst_bytes": 0.04481900501465952,
+    "packet_count": 0.09162815526694373,
+    "failed_logins": 0.021155807685163123,
+    "distinct_dst_ports": 0.06038112455906554,
+    "connection_rate": 0.2369231566032609,
+    "alert_priority": 0.33577804642487113,
+    "protocol": 2.4168025364118293e-05,
+    "time_of_day": 0.00023999347678965962
   },
   "confusion_matrix": [
     [
