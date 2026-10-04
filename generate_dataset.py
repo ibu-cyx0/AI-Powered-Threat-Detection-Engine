@@ -8,7 +8,7 @@ import numpy as np
 import os
 
 np.random.seed(42)
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
+OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def generate_dataset(n_samples=2000):
     records = []
