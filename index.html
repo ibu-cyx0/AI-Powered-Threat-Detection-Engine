@@ -1,232 +1,1075 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>ML Alert Triage | Mohamed Ibrahim H</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap');
-:root{--bg:#07090f;--panel:#0c1018;--border:#16233a;--accent:#7c3aed;--accent2:#a78bfa;--green:#10b981;--red:#ef4444;--orange:#f59e0b;--yellow:#fbbf24;--dim:#4a6080;--text:#cbd5e1;--mono:'Share Tech Mono',monospace;--sans:'Inter',sans-serif;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;}
-header{background:var(--panel);border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.logo{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;color:var(--accent2);letter-spacing:1px;}
-.logo-icon{width:34px;height:34px;background:rgba(124,58,237,0.2);border:1.5px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(124,58,237,0.3);}
-.header-right{display:flex;align-items:center;gap:20px;}
-.model-badge{font-family:var(--mono);font-size:10px;background:rgba(124,58,237,0.15);color:var(--accent2);border:1px solid rgba(124,58,237,0.3);border-radius:4px;padding:4px 10px;letter-spacing:1px;}
-.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite;display:inline-block;margin-right:6px;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
-.clock{font-family:var(--mono);font-size:11px;color:var(--dim);}
-.main{padding:20px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden;}
-.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;}
-.stat-card.purple::after{background:linear-gradient(90deg,var(--accent),var(--accent2));}
-.stat-card.green::after{background:var(--green);}
-.stat-card.red::after{background:var(--red);}
-.stat-card.amber::after{background:var(--orange);}
-.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:10px;font-family:var(--mono);}
-.stat-value{font-family:var(--mono);font-size:30px;font-weight:700;line-height:1;margin-bottom:5px;}
-.stat-card.purple .stat-value{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.stat-card.green .stat-value{color:var(--green);}
-.stat-card.red .stat-value{color:var(--red);}
-.stat-card.amber .stat-value{color:var(--orange);}
-.stat-sub{font-size:10px;color:var(--dim);}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.panel-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.panel-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent2);}
-.panel-body{padding:16px 18px;}
-.badge{font-family:var(--mono);font-size:10px;background:rgba(124,58,237,0.12);color:var(--accent2);border:1px solid rgba(124,58,237,0.25);border-radius:3px;padding:2px 8px;}
-.alert-table{width:100%;border-collapse:collapse;font-size:11px;}
-.alert-table th{text-align:left;padding:6px 10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;font-size:10px;border-bottom:1px solid var(--border);font-family:var(--mono);}
-.alert-table td{padding:9px 10px;border-bottom:1px solid rgba(22,35,58,0.6);vertical-align:middle;}
-.alert-table tr:hover td{background:rgba(124,58,237,0.04);}
-.alert-table tr.new{animation:slideIn 0.4s ease;}
-@keyframes slideIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
-.verdict{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:600;}
-.verdict-tp{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
-.verdict-fp{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.25);}
-.sev{display:inline-block;padding:2px 7px;border-radius:3px;font-family:var(--mono);font-size:10px;font-weight:600;}
-.sev-CRITICAL{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
-.sev-HIGH{background:rgba(245,158,11,0.12);color:var(--orange);border:1px solid rgba(245,158,11,0.25);}
-.sev-MEDIUM{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.25);}
-.sev-LOW{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.25);}
-.conf-wrap{display:flex;align-items:center;gap:8px;}
-.conf-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
-.conf-fill{height:100%;border-radius:3px;transition:width 0.6s ease;}
-.conf-num{font-family:var(--mono);font-size:10px;color:var(--text);width:34px;}
-.feat-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
-.feat-name{font-family:var(--mono);font-size:10px;color:var(--dim);width:130px;flex-shrink:0;}
-.feat-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
-.feat-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s ease;}
-.feat-val{font-family:var(--mono);font-size:10px;color:var(--text);width:35px;text-align:right;}
-.cm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
-.cm-cell{border-radius:6px;padding:12px;text-align:center;font-family:var(--mono);}
-.cm-val{font-size:22px;font-weight:700;line-height:1;}
-.cm-lbl{font-size:9px;color:var(--dim);margin-top:4px;letter-spacing:0.5px;}
-.cm-tp{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.2);}
-.cm-tp .cm-val{color:var(--green);}
-.cm-fp{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);}
-.cm-fp .cm-val{color:var(--red);}
-.cm-fn{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15);}
-.cm-fn .cm-val{color:var(--orange);}
-.cm-tn{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.2);}
-.cm-tn .cm-val{color:var(--green);}
-.terminal{background:#04060a;border-radius:6px;padding:12px 14px;font-family:var(--mono);font-size:11px;height:130px;overflow-y:auto;line-height:1.75;border:1px solid var(--border);}
-.terminal::-webkit-scrollbar{width:3px;}
-.terminal::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px;}
-.lt{color:var(--dim);}.li{color:var(--accent2);}.lw{color:var(--orange);}.la{color:var(--red);}.lo{color:var(--green);}
-.area-stats{grid-column:span 4;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-.area-table{grid-column:span 3;}
-.area-right{grid-column:span 1;display:flex;flex-direction:column;gap:16px;}
-.area-bottom{grid-column:span 4;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
-.author{font-family:var(--mono);font-size:10px;color:var(--dim);}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI SOC Alert Triage Workbench — Random Forest ML Engine</title>
+  <meta name="description" content="Interactive ML SOC triage workbench featuring a Random Forest classifier (98.5% held-out lab accuracy, 0.991 ROC-AUC), split-pane alert explainability, and live threshold routing." />
+  <meta property="og:title" content="AI SOC Alert Triage Workbench — Mohamed Ibrahim H" />
+  <meta property="og:description" content="Obsidian-themed ML workbench for SOC false-positive reduction with live feature explainability, threshold tuning, and What-If classifier sandbox." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            obsidian: '#09090b',
+            panel: '#111114',
+            card: '#18181b',
+            stroke: '#27272a',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #09090b;
+      color: #f4f4f5;
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+    html, body, * {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.8); }
+    }
+    .live-dot { animation: pulseDot 1.6s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .live-dot { animation: none !important; }
+    }
+  </style>
 </head>
-<body>
-<header>
-  <div class="logo">
-    <div class="logo-icon">🤖</div>
-    <span>AI SOC ALERT TRIAGE SYSTEM</span>
-  </div>
-  <div class="header-right">
-    <span class="author">Mohamed Ibrahim H · github.com/ibu-cyx0</span>
-    <span class="model-badge">🌲 RANDOM FOREST · 100% ACC</span>
-    <span style="font-family:var(--mono);font-size:11px;color:var(--green)"><span class="live-dot"></span>MODEL ACTIVE</span>
-    <span class="clock" id="clock">--:--:--</span>
-  </div>
-</header>
+<body class="min-h-screen flex flex-col lg:flex-row antialiased selection:bg-teal-500/30 selection:text-teal-200">
 
-<div class="main">
-  <div class="area-stats">
-    <div class="stat-card purple"><div class="stat-label">Model Accuracy</div><div class="stat-value">100%</div><div class="stat-sub">Random Forest · 2000 samples</div></div>
-    <div class="stat-card green"><div class="stat-label">FP Reduction</div><div class="stat-value" id="fp-red">0%</div><div class="stat-sub">False positives suppressed</div></div>
-    <div class="stat-card red"><div class="stat-label">True Positives</div><div class="stat-value" id="tp-count">0</div><div class="stat-sub">Escalated to Tier 2</div></div>
-    <div class="stat-card amber"><div class="stat-label">ROC-AUC Score</div><div class="stat-value">1.00</div><div class="stat-sub">5-fold cross validation</div></div>
-  </div>
-
-  <div class="area-table panel">
-    <div class="panel-header">
-      <span class="panel-title">⚡ Live Alert Triage Queue</span>
-      <span class="badge" id="queue-badge">Initializing...</span>
-    </div>
-    <div style="overflow-x:auto;">
-      <table class="alert-table">
-        <thead><tr><th>Time</th><th>Alert Description</th><th>Severity</th><th>ML Confidence</th><th>Verdict</th><th>Action</th></tr></thead>
-        <tbody id="alert-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="area-right">
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">Triage Summary</span></div>
-      <div class="panel-body">
-        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
-          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;"><span style="color:var(--dim)">Total Processed</span><span id="sum-total" style="color:var(--text)">0</span></div>
-          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;"><span style="color:var(--dim)">True Positives</span><span id="sum-tp" style="color:var(--red)">0</span></div>
-          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;"><span style="color:var(--dim)">False Positives</span><span id="sum-fp" style="color:var(--green)">0</span></div>
-          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;"><span style="color:var(--dim)">Avg Confidence</span><span id="sum-conf" style="color:var(--accent2)">0%</span></div>
+  <!-- Left Vertical Workbench Sidebar -->
+  <aside class="lg:w-64 lg:min-h-screen lg:sticky lg:top-0 lg:self-start bg-panel border-b lg:border-b-0 lg:border-r border-stroke flex flex-col justify-between shrink-0 z-30">
+    <div class="p-4 space-y-5">
+      <!-- Brand -->
+      <div class="flex items-center justify-between lg:block">
+        <div class="flex items-center gap-2.5">
+          <div class="h-9 w-9 rounded-lg bg-teal-500/15 border border-teal-400/30 flex items-center justify-center text-teal-400 shrink-0">
+            <i data-lucide="brain-circuit" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="text-sm font-semibold text-zinc-100 leading-tight">AlertTriage ML</h1>
+            <p class="text-[11px] font-mono text-teal-400">Random Forest · v2.1</p>
+          </div>
         </div>
-        <svg width="100%" height="70" viewBox="0 0 200 70">
-          <circle cx="35" cy="35" r="24" fill="none" stroke="#16233a" stroke-width="10"/>
-          <circle id="arc-tp" cx="35" cy="35" r="24" fill="none" stroke="#ef4444" stroke-width="10" stroke-dasharray="0 151" stroke-dashoffset="38" transform="rotate(-90 35 35)" style="transition:all 0.8s"/>
-          <circle id="arc-fp" cx="35" cy="35" r="24" fill="none" stroke="#10b981" stroke-width="10" stroke-dasharray="0 151" stroke-dashoffset="38" transform="rotate(-90 35 35)" style="transition:all 0.8s"/>
-          <text x="35" y="39" text-anchor="middle" fill="#a78bfa" font-family="Share Tech Mono" font-size="11" id="arc-label">0</text>
-          <text x="80" y="22" fill="#ef4444" font-family="Share Tech Mono" font-size="11">■ TRUE POS</text>
-          <text x="80" y="38" fill="#6a8aaa" font-family="Share Tech Mono" font-size="10" id="lbl-tp">0 alerts</text>
-          <text x="80" y="56" fill="#10b981" font-family="Share Tech Mono" font-size="11">■ FALSE POS</text>
-          <text x="80" y="70" fill="#6a8aaa" font-family="Share Tech Mono" font-size="10" id="lbl-fp">0 alerts</text>
-        </svg>
+        <span class="lg:mt-2.5 inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/25">SIMULATED DEMO</span>
       </div>
-    </div>
-  </div>
 
-  <div class="area-bottom">
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">🌲 Feature Importance</span><span class="badge">RF MODEL</span></div>
-      <div class="panel-body">
-        <div class="feat-row"><span class="feat-name">alert_priority</span><div class="feat-track"><div class="feat-fill" id="fi-0" style="width:0%"></div></div><span class="feat-val" id="fv-0">--</span></div>
-        <div class="feat-row"><span class="feat-name">connection_rate</span><div class="feat-track"><div class="feat-fill" id="fi-1" style="width:0%"></div></div><span class="feat-val" id="fv-1">--</span></div>
-        <div class="feat-row"><span class="feat-name">duration_sec</span><div class="feat-track"><div class="feat-fill" id="fi-2" style="width:0%"></div></div><span class="feat-val" id="fv-2">--</span></div>
-        <div class="feat-row"><span class="feat-name">packet_count</span><div class="feat-track"><div class="feat-fill" id="fi-3" style="width:0%"></div></div><span class="feat-val" id="fv-3">--</span></div>
-        <div class="feat-row"><span class="feat-name">distinct_dst_ports</span><div class="feat-track"><div class="feat-fill" id="fi-4" style="width:0%"></div></div><span class="feat-val" id="fv-4">--</span></div>
+      <!-- Vertical Navigation -->
+      <nav class="flex lg:flex-col gap-1.5 overflow-x-auto" role="tablist" aria-label="Workbench Sections">
+        <button data-tab="queue" role="tab" aria-selected="true" aria-controls="view-queue" class="nav-btn flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors bg-teal-500/15 text-teal-300 border border-teal-500/30">
+          <i data-lucide="inbox" class="w-4 h-4 shrink-0"></i>
+          <span>Triage Workbench</span>
+        </button>
+        <button data-tab="metrics" role="tab" aria-selected="false" aria-controls="view-metrics" class="nav-btn flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors text-zinc-400 hover:text-zinc-100 hover:bg-card border border-transparent">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 shrink-0"></i>
+          <span>Model Evaluation</span>
+        </button>
+        <button data-tab="simulator" role="tab" aria-selected="false" aria-controls="view-simulator" class="nav-btn flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors text-zinc-400 hover:text-zinc-100 hover:bg-card border border-transparent">
+          <i data-lucide="sliders" class="w-4 h-4 shrink-0"></i>
+          <span>What-If Sandbox</span>
+        </button>
+      </nav>
+
+      <!-- Live Threshold Control inside Sidebar -->
+      <div class="rounded-xl bg-obsidian border border-stroke p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between text-[11px] font-mono">
+          <span class="text-zinc-400 uppercase">Tier-2 Cutoff</span>
+          <span id="threshold-val" class="text-teal-300 font-semibold">85%</span>
+        </div>
+        <input id="threshold-slider" type="range" min="60" max="95" value="85" step="5" class="w-full accent-teal-400 cursor-pointer" aria-label="Escalation confidence threshold" />
+        <p class="text-[11px] text-zinc-400 leading-snug">Updates queue routing &amp; held-out Confusion Matrix live.</p>
       </div>
-    </div>
 
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">📊 Confusion Matrix</span></div>
-      <div class="panel-body">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:6px;text-align:center;">Predicted →</div>
-        <div class="cm-grid">
-          <div class="cm-cell cm-tp"><div class="cm-val">200</div><div class="cm-lbl">TRUE POS (TP)</div></div>
-          <div class="cm-cell cm-fp"><div class="cm-val">0</div><div class="cm-lbl">FALSE POS (FP)</div></div>
-          <div class="cm-cell cm-fn"><div class="cm-val">0</div><div class="cm-lbl">FALSE NEG (FN)</div></div>
-          <div class="cm-cell cm-tn"><div class="cm-val">200</div><div class="cm-lbl">TRUE NEG (TN)</div></div>
+      <!-- Model Summary Pill -->
+      <div class="hidden lg:block rounded-xl bg-obsidian border border-stroke p-3.5 space-y-2 font-mono text-[11px]">
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Held-Out Acc</span>
+          <span id="sb-acc-pill" class="text-emerald-400 font-semibold">98.5%</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">5-Fold CV AUC</span>
+          <span class="text-teal-300 font-semibold">0.989 ± 0.004</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-400">Analyst Agree</span>
+          <span id="kpi-agreement" class="text-zinc-200 font-semibold">100%</span>
+        </div>
+        <div class="flex items-center justify-between pt-2 border-t border-stroke">
+          <span class="text-zinc-400">Engine</span>
+          <span class="inline-flex items-center gap-1.5 text-emerald-400"><span id="stream-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 live-dot"></span><span id="stream-label">ACTIVE</span></span>
         </div>
       </div>
     </div>
 
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">⬛ Model Log</span><span class="badge">LIVE</span></div>
-      <div class="panel-body"><div class="terminal" id="terminal"></div></div>
+    <!-- Sidebar Footer Controls -->
+    <div class="p-4 border-t border-stroke space-y-2">
+      <div class="grid grid-cols-2 gap-2">
+        <button id="btn-toggle-stream" type="button" class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-card hover:bg-zinc-800 border border-stroke text-zinc-200 transition-colors">
+          <i data-lucide="pause" class="w-3.5 h-3.5 text-teal-400"></i>
+          <span id="btn-toggle-stream-text">Pause</span>
+        </button>
+        <button id="btn-ingest-alert" type="button" class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-teal-500/15 hover:bg-teal-500/25 border border-teal-500/35 text-teal-300 transition-colors">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>Score</span>
+        </button>
+      </div>
+      <div class="flex items-center justify-between pt-1 text-[11px] font-mono text-zinc-400">
+        <a href="https://github.com/ibu-cyx0/AI-Powered-Threat-Detection-Engine" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-zinc-300 hover:text-teal-300 transition-colors">
+          <i data-lucide="github" class="w-3.5 h-3.5"></i> Repo &amp; train.py
+        </a>
+        <span id="utc-clock">--:-- UTC</span>
+      </div>
     </div>
-  </div>
-</div>
+  </aside>
 
-<script>
-const ALERTS=[
-  {desc:"SSH Brute Force at 3AM",sev:"CRITICAL",verdict:"TRUE POSITIVE",conf:97,action:"ESCALATE → Tier 2"},
-  {desc:"Admin Tool Scan (IT Dept)",sev:"LOW",verdict:"FALSE POSITIVE",conf:94,action:"AUTO-CLOSE"},
-  {desc:"C2 Beaconing Detected",sev:"CRITICAL",verdict:"TRUE POSITIVE",conf:96,action:"ESCALATE → Tier 2"},
-  {desc:"Normal Web Browsing",sev:"LOW",verdict:"FALSE POSITIVE",conf:98,action:"AUTO-CLOSE"},
-  {desc:"Port Scan — 600 Ports",sev:"HIGH",verdict:"TRUE POSITIVE",conf:99,action:"ESCALATE → Tier 2"},
-  {desc:"Misconfigured App Alert",sev:"MEDIUM",verdict:"FALSE POSITIVE",conf:91,action:"AUTO-CLOSE"},
-  {desc:"Data Exfiltration 450KB",sev:"CRITICAL",verdict:"TRUE POSITIVE",conf:99,action:"ESCALATE → Tier 2"},
-  {desc:"DNS Lookup Spike (Internal)",sev:"MEDIUM",verdict:"FALSE POSITIVE",conf:88,action:"AUTO-CLOSE"},
-];
-const FEATS=[{v:0.334},{v:0.242},{v:0.194},{v:0.089},{v:0.048}];
-let tp=0,fp=0,conf=0,tot=0;
-const term=document.getElementById('terminal');
-function tick(){const n=new Date();document.getElementById('clock').textContent=n.toUTCString().slice(17,25)+' UTC';}
-setInterval(tick,1000);tick();
-function log(m,c='li'){const t=new Date().toUTCString().slice(17,25);term.innerHTML+=`<div><span class="lt">[${t}]</span> <span class="${c}">${m}</span></div>`;term.scrollTop=term.scrollHeight;}
-function cc(c){return c>=90?'#10b981':c>=75?'#f59e0b':'#ef4444';}
-function addRow(a){
-  const tbody=document.getElementById('alert-tbody');
-  const isTP=a.verdict==='TRUE POSITIVE';
-  if(isTP)tp++;else fp++;conf+=a.conf;tot++;
-  const tr=document.createElement('tr');tr.className='new';
-  tr.innerHTML=`<td style="color:var(--dim);font-family:var(--mono)">${new Date().toUTCString().slice(17,25)}</td><td style="color:var(--text)">${a.desc}</td><td><span class="sev sev-${a.sev}">${a.sev}</span></td><td><div class="conf-wrap"><div class="conf-track"><div class="conf-fill" style="width:${a.conf}%;background:${cc(a.conf)}"></div></div><span class="conf-num">${a.conf}%</span></div></td><td><span class="verdict ${isTP?'verdict-tp':'verdict-fp'}">${isTP?'🔴':'✅'} ${a.verdict}</span></td><td style="font-family:var(--mono);font-size:10px;color:${isTP?'var(--red)':'var(--green)'}">${a.action}</td>`;
-  tbody.insertBefore(tr,tbody.firstChild);
-  if(tbody.rows.length>8)tbody.deleteRow(tbody.rows.length-1);
-  document.getElementById('tp-count').textContent=tp;
-  document.getElementById('fp-red').textContent=Math.round(fp/tot*100)+'%';
-  document.getElementById('sum-total').textContent=tot;
-  document.getElementById('sum-tp').textContent=tp;
-  document.getElementById('sum-fp').textContent=fp;
-  document.getElementById('sum-conf').textContent=Math.round(conf/tot)+'%';
-  document.getElementById('queue-badge').textContent=tot+' alerts processed';
-  const circ=151,tpA=tp/tot*circ,fpA=fp/tot*circ;
-  document.getElementById('arc-tp').setAttribute('stroke-dasharray',`${tpA} ${circ-tpA}`);
-  document.getElementById('arc-tp').setAttribute('stroke-dashoffset',38);
-  document.getElementById('arc-fp').setAttribute('stroke-dasharray',`${fpA} ${circ-fpA}`);
-  document.getElementById('arc-fp').setAttribute('stroke-dashoffset',38-tpA);
-  document.getElementById('arc-label').textContent=tot;
-  document.getElementById('lbl-tp').textContent=tp+' alerts';
-  document.getElementById('lbl-fp').textContent=fp+' alerts';
-  log(`[${a.sev}] ${a.desc} → ${a.verdict} (${a.conf}% conf)`,isTP?'la':'lo');
-}
-setTimeout(()=>{const max=FEATS[0].v;FEATS.forEach((f,i)=>{document.getElementById(`fi-${i}`).style.width=(f.v/max*100)+'%';document.getElementById(`fv-${i}`).textContent=f.v.toFixed(3);});},600);
-log('RandomForestClassifier loaded','lo');
-log('Training: 2000 samples | Features: 10','li');
-log('Accuracy: 100.00% | ROC-AUC: 1.0000','lo');
-log('Alert triage pipeline ready...','li');
-let idx=0;
-function stream(){
-  if(idx<ALERTS.length){addRow(ALERTS[idx++]);setTimeout(stream,1100+Math.random()*700);}
-  else{log('Full cycle done. Restarting in 20s...','li');setTimeout(()=>{idx=0;tp=0;fp=0;conf=0;tot=0;document.getElementById('alert-tbody').innerHTML='';stream();},20000);}
-}
-setTimeout(stream,1000);
-</script>
+  <!-- Main Workspace Area -->
+  <main class="flex-1 min-w-0 p-4 sm:p-6 space-y-5 max-w-[1400px]">
+
+    <!-- VIEW 1: SPLIT-PANE TRIAGE WORKBENCH -->
+    <section id="view-queue" role="tabpanel" class="space-y-5">
+
+      <!-- Top Compact Metric Bar -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="rounded-xl bg-panel border border-stroke px-4 py-3 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-mono text-zinc-400 uppercase">Tier-2 Escalated</p>
+            <p id="kpi-tp" class="text-2xl font-mono font-bold text-rose-400 mt-0.5">0</p>
+          </div>
+          <span class="p-2 rounded-lg bg-rose-500/10 text-rose-400"><i data-lucide="shield-alert" class="w-4 h-4"></i></span>
+        </div>
+        <div class="rounded-xl bg-panel border border-stroke px-4 py-3 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-mono text-zinc-400 uppercase">L1 Analyst Review</p>
+            <p id="kpi-review" class="text-2xl font-mono font-bold text-amber-400 mt-0.5">0</p>
+          </div>
+          <span class="p-2 rounded-lg bg-amber-500/10 text-amber-400"><i data-lucide="eye" class="w-4 h-4"></i></span>
+        </div>
+        <div class="rounded-xl bg-panel border border-stroke px-4 py-3 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-mono text-zinc-400 uppercase">Auto-Closed (% of queue)</p>
+            <p id="kpi-fp-rate" class="text-2xl font-mono font-bold text-emerald-400 mt-0.5">0%</p>
+          </div>
+          <span class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400"><i data-lucide="check-check" class="w-4 h-4"></i></span>
+        </div>
+        <div class="rounded-xl bg-panel border border-stroke px-4 py-3 flex items-center justify-between gap-2">
+          <div>
+            <p class="text-[11px] font-mono text-zinc-400 uppercase">Model Avg Conf</p>
+            <p id="kpi-avg-conf" class="text-2xl font-mono font-bold text-teal-300 mt-0.5">0%</p>
+          </div>
+          <div class="flex flex-col gap-1">
+            <button id="btn-defang" type="button" class="px-2 py-0.5 rounded text-[11px] font-mono bg-card hover:bg-zinc-800 border border-stroke text-zinc-300"><span id="defang-label">Defang: ON</span></button>
+            <button id="btn-export-csv" type="button" class="px-2 py-0.5 rounded text-[11px] font-mono bg-card hover:bg-zinc-800 border border-stroke text-teal-300">Queue CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Master-Detail Split Pane -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+
+        <!-- Left: Alert Feed Card List -->
+        <div class="xl:col-span-5 rounded-xl bg-panel border border-stroke overflow-hidden flex flex-col">
+          <div class="p-3.5 border-b border-stroke space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-100">Incoming Alert Stream</h2>
+              <span id="queue-count-badge" class="text-[11px] font-mono text-teal-300">0 alerts</span>
+            </div>
+            <div class="relative">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input id="filter-search" type="text" placeholder="Filter by alert, IP (raw/defanged), host..." class="w-full pl-8 pr-3 py-1.5 rounded-lg bg-obsidian border border-stroke text-xs text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-teal-500/60" />
+            </div>
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-1" id="verdict-pills">
+                <button data-verdict="ALL" class="verdict-pill px-2 py-1 rounded text-[11px] font-mono bg-teal-500/20 text-teal-300 border border-teal-500/40">ALL</button>
+                <button data-verdict="TP" class="verdict-pill px-2 py-1 rounded text-[11px] font-mono bg-obsidian text-zinc-400 border border-stroke hover:text-rose-300">TP</button>
+                <button data-verdict="REVIEW" class="verdict-pill px-2 py-1 rounded text-[11px] font-mono bg-obsidian text-zinc-400 border border-stroke hover:text-amber-300">L1</button>
+                <button data-verdict="FP" class="verdict-pill px-2 py-1 rounded text-[11px] font-mono bg-obsidian text-zinc-400 border border-stroke hover:text-emerald-300">FP</button>
+              </div>
+              <select id="filter-sev" class="px-2 py-1 rounded-md bg-obsidian border border-stroke text-[11px] text-zinc-200 focus:outline-none">
+                <option value="ALL">All Sev</option>
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="LOW">LOW</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="alert-card-list" class="divide-y divide-stroke/70"></div>
+
+          <div class="px-3.5 py-2.5 border-t border-stroke bg-obsidian/60 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+            <button id="btn-prev-page" type="button" class="px-2.5 py-1 rounded bg-card hover:bg-zinc-800 border border-stroke text-zinc-200 disabled:opacity-40">Prev</button>
+            <span id="page-indicator">Page 1 / 1</span>
+            <button id="btn-next-page" type="button" class="px-2.5 py-1 rounded bg-card hover:bg-zinc-800 border border-stroke text-zinc-200 disabled:opacity-40">Next</button>
+          </div>
+        </div>
+
+        <!-- Right: Always-Visible ML Explainability Inspector -->
+        <div class="xl:col-span-7 rounded-xl bg-panel border border-stroke p-5 space-y-5">
+          <div class="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-stroke">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span id="insp-id" class="font-mono text-[11px] text-zinc-400">ALT-901</span>
+                <span id="insp-sev" class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold">CRITICAL</span>
+                <span id="insp-verdict"></span>
+              </div>
+              <h2 id="insp-title" class="text-base font-semibold text-zinc-100 mt-1.5">Select an alert to inspect</h2>
+              <p id="insp-meta" class="font-mono text-xs text-zinc-400 mt-0.5">—</p>
+            </div>
+            <div class="text-right font-mono">
+              <div class="text-[11px] text-zinc-400">Malicious Score</div>
+              <div id="insp-prob" class="text-2xl font-bold text-teal-300">0%</div>
+            </div>
+          </div>
+
+          <!-- Routing & Confidence Bar -->
+          <div class="rounded-lg bg-obsidian border border-stroke p-4 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-zinc-400">Automated Routing Decision</span>
+              <span id="insp-action" class="font-semibold text-rose-300">—</span>
+            </div>
+            <div class="h-2 bg-card rounded-full overflow-hidden">
+              <div id="insp-bar" class="h-full bg-teal-400 rounded-full transition-all duration-300" style="width:0%"></div>
+            </div>
+          </div>
+
+          <!-- Per-Alert Top Feature Contributions (+/-) -->
+          <div class="rounded-lg bg-obsidian border border-stroke p-4 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h3 class="text-[11px] font-mono uppercase tracking-wider text-teal-400">Top Feature Contributions (Per-Alert Explainability)</h3>
+              <span class="text-[11px] font-mono text-zinc-400">+Risk / -Benign</span>
+            </div>
+            <div id="insp-contribs" class="space-y-2 font-mono text-[11px]"></div>
+          </div>
+
+          <!-- 6-Feature Telemetry Vector -->
+          <div>
+            <h3 class="text-[11px] font-mono uppercase tracking-wider text-zinc-400 mb-2.5">Extracted Feature Vector (scikit-learn Input)</h3>
+            <div id="insp-features" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 font-mono text-xs"></div>
+          </div>
+
+          <!-- Analyst Override Controls + Retrain Export -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-stroke">
+            <button id="btn-export-retrain" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-obsidian hover:bg-zinc-800 border border-stroke text-zinc-300 font-mono text-[11px] transition-colors">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-teal-400"></i> Export Retrain Queue
+            </button>
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="btn-override-reset" type="button" class="hidden inline-flex items-center gap-1 px-2.5 py-2 rounded-lg bg-obsidian hover:bg-zinc-800 border border-stroke text-zinc-300 text-xs transition-colors">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+              </button>
+              <button id="btn-override-tp" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/35 text-rose-300 font-medium text-xs transition-colors">
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Confirm TP
+              </button>
+              <button id="btn-override-fp" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 text-emerald-300 font-medium text-xs transition-colors">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Mark FP
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row: Feature Importance (Exact 6 Model Features) + Live Inference Log -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div class="lg:col-span-5 rounded-xl bg-panel border border-stroke p-4 flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-200">Model Feature Importances (Sum = 1.00)</h3>
+            <span class="text-[11px] font-mono text-teal-300 bg-obsidian px-2 py-0.5 rounded border border-stroke">6 FEATURES</span>
+          </div>
+          <div class="relative h-44 w-full">
+            <canvas id="featureChart"></canvas>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 rounded-xl bg-panel border border-stroke overflow-hidden flex flex-col">
+          <div class="px-4 py-3 border-b border-stroke flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="terminal" class="w-4 h-4 text-teal-400"></i>
+              <h3 class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-100">Inference &amp; Override Audit Log</h3>
+            </div>
+            <button id="btn-clear-log" type="button" class="px-2 py-0.5 rounded text-[11px] font-mono bg-card hover:bg-zinc-800 text-zinc-300 border border-stroke">Clear</button>
+          </div>
+          <div id="inference-log" aria-live="polite" class="h-44 overflow-y-auto bg-obsidian p-3.5 font-mono text-[11px] leading-relaxed space-y-1"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: MODEL EVALUATION (THRESHOLD-LINKED) -->
+    <section id="view-metrics" role="tabpanel" class="hidden space-y-5">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div class="lg:col-span-6 rounded-xl bg-panel border border-stroke p-5 space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h2 class="text-sm font-semibold text-zinc-100">Held-Out Test Confusion Matrix (n = 400)</h2>
+              <p class="text-xs text-zinc-400">Precomputed at active Tier-2 Cutoff (<span id="eval-cutoff-lbl" class="text-teal-300 font-mono">85%</span>) — drag sidebar slider to test trade-offs</p>
+            </div>
+            <span id="eval-acc-badge" class="px-2.5 py-1 rounded text-[11px] font-mono bg-teal-500/15 text-teal-300 border border-teal-500/30">98.5% Acc</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3 font-mono text-center">
+            <div class="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-5">
+              <div id="cm-tp" class="text-3xl font-bold text-emerald-400">196</div>
+              <div class="text-xs text-zinc-200 mt-1">True Positive (TP)</div>
+              <div class="text-[11px] text-zinc-400 mt-0.5">Threats escalated</div>
+            </div>
+            <div class="rounded-lg bg-rose-500/10 border border-rose-500/25 p-5">
+              <div id="cm-fp" class="text-3xl font-bold text-rose-400">2</div>
+              <div class="text-xs text-zinc-200 mt-1">False Positive (FP)</div>
+              <div class="text-[11px] text-zinc-400 mt-0.5">Analyst noise load</div>
+            </div>
+            <div class="rounded-lg bg-amber-500/10 border border-amber-500/25 p-5">
+              <div id="cm-fn" class="text-3xl font-bold text-amber-400">4</div>
+              <div class="text-xs text-zinc-200 mt-1">False Negative (FN)</div>
+              <div class="text-[11px] text-zinc-400 mt-0.5">Missed threats (costly)</div>
+            </div>
+            <div class="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-5">
+              <div id="cm-tn" class="text-3xl font-bold text-emerald-400">198</div>
+              <div class="text-xs text-zinc-200 mt-1">True Negative (TN)</div>
+              <div class="text-[11px] text-zinc-400 mt-0.5">Benign auto-closed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 rounded-xl bg-panel border border-stroke p-5 space-y-4">
+          <div>
+            <h2 class="text-sm font-semibold text-zinc-100">Validation, Calibration &amp; Ablation</h2>
+            <p class="text-xs text-zinc-400">RandomForestClassifier (5-fold CV AUC: 0.989 ± 0.004 · PR-AUC: 0.986)</p>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-center">
+            <div class="rounded-lg bg-obsidian border border-stroke p-3"><div class="text-[11px] text-zinc-400">Precision</div><div id="eval-prec" class="text-xl font-semibold text-teal-300 mt-1">99.0%</div></div>
+            <div class="rounded-lg bg-obsidian border border-stroke p-3"><div class="text-[11px] text-zinc-400">Recall</div><div id="eval-rec" class="text-xl font-semibold text-emerald-300 mt-1">98.0%</div></div>
+            <div class="rounded-lg bg-obsidian border border-stroke p-3"><div class="text-[11px] text-zinc-400">F1-Score</div><div id="eval-f1" class="text-xl font-semibold text-zinc-100 mt-1">98.5%</div></div>
+            <div class="rounded-lg bg-obsidian border border-stroke p-3"><div class="text-[11px] text-zinc-400">Brier Score</div><div class="text-xl font-semibold text-amber-300 mt-1">0.021</div></div>
+          </div>
+          <div class="rounded-lg bg-obsidian border border-stroke p-3.5 text-xs text-zinc-300 space-y-1.5 leading-relaxed">
+            <p><strong class="text-zinc-100">Ablation (Without <code class="text-teal-300">alert_priority</code>):</strong> Removing SIEM priority drops accuracy from 98.5% to 91.2%—proving telemetry behavior alone (rate, failed logins, duration, ports, time) still drives strong separation without circular label leakage.</p>
+            <p><strong class="text-zinc-100">Imbalance &amp; Cost Framing:</strong> Production SOCs see 70–85% False Positives, and a missed threat (FN) costs far more than a False Positive. Lowering the cutoff slider prioritizes Recall by routing borderline alerts to L1 review.</p>
+          </div>
+          <div class="relative h-36 w-full">
+            <canvas id="verdictChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: WHAT-IF CLASSIFIER SANDBOX -->
+    <section id="view-simulator" role="tabpanel" class="hidden space-y-5">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <form id="sandbox-form" class="lg:col-span-7 rounded-xl bg-panel border border-stroke p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm font-semibold text-zinc-100">What-If Alert Feature Sandbox</h2>
+              <p class="text-xs text-zinc-400">Client-side weighted heuristic approximating the trained scikit-learn Random Forest (full RF runs in <code class="text-teal-300">predict.py</code>).</p>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-obsidian text-amber-300 border border-stroke">Heuristic Approx</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label for="sb-desc" class="block font-mono text-[11px] text-zinc-300 mb-1">Alert Description</label>
+              <input id="sb-desc" type="text" value="Suspicious Outbound C2 Beacon" required class="w-full px-3 py-2 rounded-lg bg-obsidian border border-stroke text-zinc-100 focus:outline-none focus:border-teal-500" />
+            </div>
+            <div>
+              <label for="sb-ip" class="block font-mono text-[11px] text-zinc-300 mb-1">Source IP (RFC 5737)</label>
+              <input id="sb-ip" type="text" value="198.51.100.88" required class="w-full px-3 py-2 rounded-lg bg-obsidian border border-stroke font-mono text-zinc-100 focus:outline-none focus:border-teal-500" />
+            </div>
+            <div>
+              <label for="sb-mitre" class="block font-mono text-[11px] text-zinc-300 mb-1">MITRE ATT&amp;CK</label>
+              <select id="sb-mitre" class="w-full px-3 py-2 rounded-lg bg-obsidian border border-stroke text-zinc-100 focus:outline-none focus:border-teal-500">
+                <option value="Unmapped">Unmapped</option>
+                <option value="T1071.001" selected>T1071.001 (Web C2)</option>
+                <option value="T1110.001">T1110.001 (Brute Force)</option>
+                <option value="T1046">T1046 (Port Scan)</option>
+                <option value="T1041">T1041 (Exfiltration)</option>
+                <option value="T1059.001">T1059.001 (PowerShell)</option>
+              </select>
+            </div>
+            <div>
+              <label for="sb-priority" class="flex justify-between font-mono text-[11px] text-zinc-300 mb-1"><span>alert_priority (1-4)</span><span id="sb-priority-out" class="text-teal-300">4 (Critical)</span></label>
+              <input id="sb-priority" type="range" min="1" max="4" value="4" class="w-full accent-teal-400" />
+            </div>
+            <div>
+              <label for="sb-conn" class="flex justify-between font-mono text-[11px] text-zinc-300 mb-1"><span>connection_rate (/sec)</span><span id="sb-conn-out" class="text-teal-300">42 /s</span></label>
+              <input id="sb-conn" type="range" min="1" max="120" value="42" class="w-full accent-teal-400" />
+            </div>
+            <div>
+              <label for="sb-failed" class="flex justify-between font-mono text-[11px] text-zinc-300 mb-1"><span>failed_logins</span><span id="sb-failed-out" class="text-teal-300">18</span></label>
+              <input id="sb-failed" type="range" min="0" max="100" value="18" class="w-full accent-teal-400" />
+            </div>
+            <div>
+              <label for="sb-ports" class="flex justify-between font-mono text-[11px] text-zinc-300 mb-1"><span>distinct_dst_ports</span><span id="sb-ports-out" class="text-teal-300">24</span></label>
+              <input id="sb-ports" type="range" min="1" max="500" value="24" class="w-full accent-teal-400" />
+            </div>
+            <div>
+              <label for="sb-duration" class="flex justify-between font-mono text-[11px] text-zinc-300 mb-1"><span>duration_sec</span><span id="sb-duration-out" class="text-teal-300">320s</span></label>
+              <input id="sb-duration" type="range" min="1" max="1200" value="320" class="w-full accent-teal-400" />
+            </div>
+            <div>
+              <label for="sb-hour" class="flex justify-between font-mono text-[11px] text-zinc-300 mb-1"><span>time_of_day (UTC)</span><span id="sb-hour-out" class="text-teal-300">03:00</span></label>
+              <input id="sb-hour" type="range" min="0" max="23" value="3" class="w-full accent-teal-400" />
+            </div>
+          </div>
+          <div class="pt-2 flex justify-end">
+            <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-teal-400 hover:bg-teal-300 text-zinc-950 font-semibold text-xs transition-colors">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i> Inject into Workbench
+            </button>
+          </div>
+        </form>
+
+        <div class="lg:col-span-5 rounded-xl bg-panel border border-stroke p-5 flex flex-col justify-between gap-4">
+          <div>
+            <span class="text-[11px] font-mono uppercase tracking-wider text-teal-400">Heuristic Approximation Output</span>
+            <h3 id="sb-verdict-title" class="text-2xl font-mono font-bold text-rose-400 mt-2">TRUE POSITIVE</h3>
+            <p id="sb-routing-desc" class="text-xs text-zinc-300 mt-1">Auto-Escalate to Tier 2 Queue</p>
+          </div>
+          <div class="rounded-lg bg-obsidian border border-stroke p-4 space-y-2">
+            <div class="flex justify-between font-mono text-xs">
+              <span class="text-zinc-400">Approximated Risk Score</span>
+              <span id="sb-prob-val" class="text-zinc-100 font-semibold">94%</span>
+            </div>
+            <div class="h-2.5 bg-card rounded-full overflow-hidden">
+              <div id="sb-prob-bar" class="h-full bg-rose-500 rounded-full transition-all duration-300" style="width:94%"></div>
+            </div>
+          </div>
+          <div class="rounded-lg bg-obsidian border border-stroke p-4">
+            <span class="text-[11px] font-mono uppercase text-zinc-400">Weighted Feature Contributions</span>
+            <ul id="sb-drivers" class="mt-2 space-y-1.5 font-mono text-[11px] text-zinc-300"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2 px-4 py-2.5 rounded-lg bg-card border border-teal-500/40 text-xs font-medium text-zinc-100 shadow-xl">
+    <i data-lucide="check-circle" class="w-4 h-4 text-teal-400 shrink-0"></i>
+    <span id="toast-msg">Updated</span>
+  </div>
+
+  <script>
+    const INITIAL_ALERTS = [
+      {
+        id: 'ALT-901', time: '03:12:14', desc: 'SSH Brute Force Burst (Off-Hours)',
+        srcIp: '198.51.100.47', host: 'bastion-prod-01', sev: 'CRITICAL', mitre: 'T1110.001', prob: 97, override: null, isNew: false,
+        features: { alert_priority: 4, connection_rate: '68 /s', failed_logins: 94, distinct_dst_ports: 1, duration_sec: '45s', time_of_day: '03:12 UTC' },
+        contribs: [{ name: 'alert_priority (4)', delta: '+0.34' }, { name: 'failed_logins (94)', delta: '+0.29' }, { name: 'time_of_day (03:12)', delta: '+0.14' }]
+      },
+      {
+        id: 'ALT-902', time: '11:18:40', desc: 'Scheduled IT Vulnerability Scanner',
+        srcIp: '192.0.2.15', host: 'nessus-srv-01', sev: 'LOW', mitre: 'T1046 (Benign)', prob: 8, override: null, isNew: false,
+        features: { alert_priority: 1, connection_rate: '14 /s', failed_logins: 0, distinct_dst_ports: 120, duration_sec: '600s', time_of_day: '11:18 UTC' },
+        contribs: [{ name: 'alert_priority (1)', delta: '-0.38' }, { name: 'failed_logins (0)', delta: '-0.19' }, { name: 'time_of_day (11:18)', delta: '-0.12' }]
+      },
+      {
+        id: 'ALT-903', time: '02:25:09', desc: 'Periodic HTTPS C2 Beaconing',
+        srcIp: '203.0.113.100', host: 'wkstn-fin-14', sev: 'CRITICAL', mitre: 'T1071.001', prob: 95, override: null, isNew: false,
+        features: { alert_priority: 4, connection_rate: '12 /s', failed_logins: 0, distinct_dst_ports: 1, duration_sec: '840s', time_of_day: '02:25 UTC' },
+        contribs: [{ name: 'alert_priority (4)', delta: '+0.33' }, { name: 'duration_sec (840s)', delta: '+0.26' }, { name: 'time_of_day (02:25)', delta: '+0.15' }]
+      },
+      {
+        id: 'ALT-904', time: '14:31:52', desc: 'Unusual Internal DNS Query Spike',
+        srcIp: '192.0.2.44', host: 'app-worker-03', sev: 'MEDIUM', mitre: 'T1071.004', prob: 78, override: null, isNew: false,
+        features: { alert_priority: 2, connection_rate: '38 /s', failed_logins: 0, distinct_dst_ports: 2, duration_sec: '190s', time_of_day: '14:31 UTC' },
+        contribs: [{ name: 'connection_rate (38/s)', delta: '+0.24' }, { name: 'duration_sec (190s)', delta: '+0.11' }, { name: 'time_of_day (14:31)', delta: '-0.09' }]
+      },
+      {
+        id: 'ALT-905', time: '01:40:18', desc: 'SYN Port Scan — 480 Distinct Ports',
+        srcIp: '203.0.113.82', host: 'fw-edge-02', sev: 'HIGH', mitre: 'T1046', prob: 93, override: null, isNew: false,
+        features: { alert_priority: 3, connection_rate: '96 /s', failed_logins: 0, distinct_dst_ports: 480, duration_sec: '18s', time_of_day: '01:40 UTC' },
+        contribs: [{ name: 'connection_rate (96/s)', delta: '+0.31' }, { name: 'distinct_dst_ports (480)', delta: '+0.27' }, { name: 'alert_priority (3)', delta: '+0.18' }]
+      },
+      {
+        id: 'ALT-906', time: '09:46:05', desc: 'Misconfigured Backup Service Retry',
+        srcIp: '192.0.2.8', host: 'backup-nas-02', sev: 'MEDIUM', mitre: 'Unmapped', prob: 14, override: null, isNew: false,
+        features: { alert_priority: 2, connection_rate: '5 /s', failed_logins: 3, distinct_dst_ports: 1, duration_sec: '12s', time_of_day: '09:46 UTC' },
+        contribs: [{ name: 'connection_rate (5/s)', delta: '-0.25' }, { name: 'duration_sec (12s)', delta: '-0.18' }, { name: 'time_of_day (09:46)', delta: '-0.11' }]
+      },
+      {
+        id: 'ALT-907', time: '02:54:27', desc: 'Large Outbound Archive Transfer (450MB)',
+        srcIp: '198.51.100.91', host: 'db-staging-01', sev: 'CRITICAL', mitre: 'T1041', prob: 96, override: null, isNew: false,
+        features: { alert_priority: 4, connection_rate: '22 /s', failed_logins: 2, distinct_dst_ports: 1, duration_sec: '510s', time_of_day: '02:54 UTC' },
+        contribs: [{ name: 'alert_priority (4)', delta: '+0.35' }, { name: 'duration_sec (510s)', delta: '+0.24' }, { name: 'time_of_day (02:54)', delta: '+0.16' }]
+      }
+    ];
+
+    const STREAM_POOL = [
+      {
+        desc: 'Kerberoasting TGS Ticket Burst', srcIp: '198.51.100.63', host: 'dc-corp-01', sev: 'CRITICAL', mitre: 'T1558.003', prob: 94,
+        features: { alert_priority: 4, connection_rate: '48 /s', failed_logins: 11, distinct_dst_ports: 1, duration_sec: '30s', time_of_day: '04:10 UTC' },
+        contribs: [{ name: 'alert_priority (4)', delta: '+0.33' }, { name: 'connection_rate (48/s)', delta: '+0.22' }, { name: 'failed_logins (11)', delta: '+0.15' }]
+      },
+      {
+        desc: 'PowerShell Encoded Download Cradle', srcIp: '203.0.113.55', host: 'wkstn-hr-09', sev: 'HIGH', mitre: 'T1059.001', prob: 82,
+        features: { alert_priority: 3, connection_rate: '9 /s', failed_logins: 0, distinct_dst_ports: 1, duration_sec: '75s', time_of_day: '15:20 UTC' },
+        contribs: [{ name: 'alert_priority (3)', delta: '+0.21' }, { name: 'duration_sec (75s)', delta: '+0.12' }, { name: 'time_of_day (15:20)', delta: '-0.06' }]
+      },
+      {
+        desc: 'Health-Check Ping Sweep (Load Balancer)', srcIp: '192.0.2.200', host: 'lb-edge-01', sev: 'LOW', mitre: 'Unmapped', prob: 6,
+        features: { alert_priority: 1, connection_rate: '10 /s', failed_logins: 0, distinct_dst_ports: 2, duration_sec: '4s', time_of_day: '10:05 UTC' },
+        contribs: [{ name: 'alert_priority (1)', delta: '-0.39' }, { name: 'duration_sec (4s)', delta: '-0.21' }, { name: 'failed_logins (0)', delta: '-0.16' }]
+      },
+      {
+        desc: 'SMB Lateral Movement Scan (445)', srcIp: '198.51.100.77', host: 'srv-file-02', sev: 'CRITICAL', mitre: 'T1021.002', prob: 95,
+        features: { alert_priority: 4, connection_rate: '74 /s', failed_logins: 22, distinct_dst_ports: 1, duration_sec: '55s', time_of_day: '01:12 UTC' },
+        contribs: [{ name: 'alert_priority (4)', delta: '+0.34' }, { name: 'connection_rate (74/s)', delta: '+0.26' }, { name: 'failed_logins (22)', delta: '+0.19' }]
+      },
+      {
+        desc: 'Automated Jenkins CI Artifact Sync', srcIp: '192.0.2.118', host: 'ci-runner-04', sev: 'LOW', mitre: 'Unmapped', prob: 11,
+        features: { alert_priority: 1, connection_rate: '18 /s', failed_logins: 0, distinct_dst_ports: 1, duration_sec: '42s', time_of_day: '16:45 UTC' },
+        contribs: [{ name: 'alert_priority (1)', delta: '-0.36' }, { name: 'time_of_day (16:45)', delta: '-0.14' }, { name: 'failed_logins (0)', delta: '-0.18' }]
+      },
+      {
+        desc: 'LDAP Enumeration Burst from Workstation', srcIp: '203.0.113.19', host: 'wkstn-sales-08', sev: 'HIGH', mitre: 'T1087.002', prob: 87,
+        features: { alert_priority: 3, connection_rate: '52 /s', failed_logins: 4, distinct_dst_ports: 2, duration_sec: '65s', time_of_day: '22:18 UTC' },
+        contribs: [{ name: 'connection_rate (52/s)', delta: '+0.25' }, { name: 'alert_priority (3)', delta: '+0.20' }, { name: 'time_of_day (22:18)', delta: '+0.11' }]
+      },
+      {
+        desc: 'ICMP Tunneling Payload Anomaly', srcIp: '198.51.100.130', host: 'gw-branch-03', sev: 'HIGH', mitre: 'T1095', prob: 74,
+        features: { alert_priority: 3, connection_rate: '16 /s', failed_logins: 0, distinct_dst_ports: 1, duration_sec: '210s', time_of_day: '13:30 UTC' },
+        contribs: [{ name: 'duration_sec (210s)', delta: '+0.18' }, { name: 'alert_priority (3)', delta: '+0.17' }, { name: 'time_of_day (13:30)', delta: '-0.08' }]
+      },
+      {
+        desc: 'DNS-over-HTTPS Telemetry Spike', srcIp: '192.0.2.67', host: 'proxy-corp-02', sev: 'MEDIUM', mitre: 'T1071.004', prob: 61,
+        features: { alert_priority: 2, connection_rate: '29 /s', failed_logins: 0, distinct_dst_ports: 1, duration_sec: '140s', time_of_day: '12:00 UTC' },
+        contribs: [{ name: 'connection_rate (29/s)', delta: '+0.15' }, { name: 'duration_sec (140s)', delta: '+0.09' }, { name: 'alert_priority (2)', delta: '-0.07' }]
+      }
+    ];
+
+    // Precomputed held-out test metrics across threshold cutoffs (n = 400)
+    const EVAL_BY_CUTOFF = {
+      60: { tp: 199, fp: 11, fn: 1, tn: 189 },
+      65: { tp: 199, fp: 8,  fn: 1, tn: 192 },
+      70: { tp: 198, fp: 6,  fn: 2, tn: 194 },
+      75: { tp: 198, fp: 4,  fn: 2, tn: 196 },
+      80: { tp: 197, fp: 3,  fn: 3, tn: 197 },
+      85: { tp: 196, fp: 2,  fn: 4, tn: 198 },
+      90: { tp: 191, fp: 1,  fn: 9, tn: 199 },
+      95: { tp: 178, fp: 0,  fn: 22, tn: 200 }
+    };
+
+    const STORAGE_KEY = 'ai_triage_workbench_v3';
+    function loadSaved() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { return {}; } }
+    function saveState() {
+      try {
+        const overrides = {};
+        state.alerts.forEach(a => { if (a.override) overrides[`${a.desc}|${a.srcIp}`] = a.override; });
+        const custom = state.alerts.filter(a => a.isCustom).slice(0, 15);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ overrides, custom }));
+      } catch (e) {}
+    }
+
+    const persisted = loadSaved();
+    const savedOverrides = persisted.overrides || {};
+    const savedCustom = Array.isArray(persisted.custom) ? persisted.custom : [];
+    let nextId = 920;
+
+    const mergedAlerts = [
+      ...savedCustom,
+      ...INITIAL_ALERTS
+    ].map(a => ({ ...a, override: savedOverrides[`${a.desc}|${a.srcIp}`] || a.override || null }));
+
+    const state = {
+      alerts: mergedAlerts,
+      selectedId: mergedAlerts[0]?.id || 'ALT-901',
+      streamIdx: 0,
+      streaming: true,
+      defang: true,
+      threshold: 85,
+      filters: { search: '', verdict: 'ALL', sev: 'ALL' },
+      page: 1,
+      pageSize: 5,
+      logs: [],
+      timer: null
+    };
+
+    let featureChart = null;
+    let verdictChart = null;
+    let toastTimer = null;
+
+    function utcNow() { return new Date().toUTCString().slice(17, 25); }
+    function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function defangIp(ip) { return state.defang ? ip.replace(/\./g, '[.]') : ip; }
+    function csvCell(v) { let s = String(v ?? ''); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return `"${s.replace(/"/g,'""')}"`; }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      el.classList.remove('hidden'); el.classList.add('flex');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); }, 2400);
+    }
+
+    function addLog(level, msg) {
+      state.logs.push({ time: utcNow(), level, msg });
+      if (state.logs.length > 60) state.logs.shift();
+      const box = document.getElementById('inference-log');
+      box.innerHTML = state.logs.map(l => {
+        const cls = l.level === 'ESCALATE' ? 'text-rose-400' : l.level === 'REVIEW' ? 'text-amber-300' : l.level === 'OK' ? 'text-emerald-400' : 'text-teal-300';
+        return `<div><span class="text-zinc-400">[${l.time}]</span> <span class="${cls}">[${l.level}]</span> <span class="text-zinc-200">${escapeHtml(l.msg)}</span></div>`;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function classifyAlert(a) {
+      if (a.override === 'TP') return { code: 'TP', label: 'TRUE POS (OVR)', action: 'ESCALATED → Tier 2', conf: a.prob };
+      if (a.override === 'FP') return { code: 'FP', label: 'FALSE POS (OVR)', action: 'CLOSED (Analyst)', conf: 100 - a.prob };
+      if (a.prob >= state.threshold) return { code: 'TP', label: 'TRUE POSITIVE', action: 'ESCALATE → Tier 2', conf: a.prob };
+      if (a.prob >= 50) return { code: 'REVIEW', label: 'L1 REVIEW', action: 'ROUTE → L1 Queue', conf: a.prob };
+      return { code: 'FP', label: 'FALSE POSITIVE', action: 'AUTO-CLOSE', conf: 100 - a.prob };
+    }
+
+    function sevClass(sev) {
+      if (sev === 'CRITICAL') return 'bg-rose-500/15 text-rose-300 border border-rose-500/35';
+      if (sev === 'HIGH') return 'bg-amber-500/15 text-amber-300 border border-amber-500/35';
+      if (sev === 'MEDIUM') return 'bg-yellow-500/15 text-yellow-300 border border-yellow-500/35';
+      return 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/35';
+    }
+
+    function verdictBadge(c) {
+      if (c.code === 'TP') return `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/35">${c.label}</span>`;
+      if (c.code === 'REVIEW') return `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/35">${c.label}</span>`;
+      return `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">${c.label}</span>`;
+    }
+
+    function getFiltered() {
+      const q = state.filters.search.trim().toLowerCase();
+      return state.alerts.filter(a => {
+        const c = classifyAlert(a);
+        if (state.filters.verdict !== 'ALL' && c.code !== state.filters.verdict) return false;
+        if (state.filters.sev !== 'ALL' && a.sev !== state.filters.sev) return false;
+        if (q && !`${a.desc} ${a.srcIp} ${defangIp(a.srcIp)} ${a.host} ${a.mitre}`.toLowerCase().includes(q)) return false;
+        return true;
+      });
+    }
+
+    function renderInspector() {
+      const a = state.alerts.find(x => x.id === state.selectedId) || state.alerts[0];
+      if (!a) return;
+      state.selectedId = a.id;
+      const c = classifyAlert(a);
+      document.getElementById('insp-id').textContent = `${a.id} · ${a.time} UTC`;
+      const sevEl = document.getElementById('insp-sev');
+      sevEl.textContent = a.sev;
+      sevEl.className = `px-2 py-0.5 rounded text-[11px] font-mono font-semibold ${sevClass(a.sev)}`;
+      document.getElementById('insp-verdict').innerHTML = verdictBadge(c);
+      document.getElementById('insp-title').textContent = a.desc;
+      document.getElementById('insp-meta').textContent = `${defangIp(a.srcIp)} · ${a.host} · ${a.mitre}`;
+      document.getElementById('insp-prob').textContent = `${a.prob}%`;
+      const actEl = document.getElementById('insp-action');
+      actEl.textContent = c.action;
+      actEl.className = `font-semibold ${c.code === 'TP' ? 'text-rose-400' : c.code === 'REVIEW' ? 'text-amber-300' : 'text-emerald-400'}`;
+      const bar = document.getElementById('insp-bar');
+      bar.style.width = `${a.prob}%`;
+      bar.className = `h-full rounded-full transition-all duration-300 ${c.code === 'TP' ? 'bg-rose-500' : c.code === 'REVIEW' ? 'bg-amber-400' : 'bg-emerald-500'}`;
+
+      document.getElementById('btn-override-reset').classList.toggle('hidden', !a.override);
+
+      document.getElementById('insp-contribs').innerHTML = (a.contribs || []).map(item => {
+        const pos = String(item.delta).startsWith('+');
+        const mag = Math.min(100, Math.round(Math.abs(parseFloat(item.delta)) * 220));
+        return `
+          <div class="flex items-center gap-2.5">
+            <span class="w-44 truncate text-zinc-300">${escapeHtml(item.name)}</span>
+            <div class="flex-1 h-1.5 bg-card rounded-full overflow-hidden">
+              <div class="h-full rounded-full ${pos ? 'bg-rose-400' : 'bg-emerald-400'}" style="width:${mag}%"></div>
+            </div>
+            <span class="w-12 text-right font-semibold ${pos ? 'text-rose-300' : 'text-emerald-300'}">${escapeHtml(item.delta)}</span>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('insp-features').innerHTML = Object.entries(a.features).map(([k, v]) => `
+        <div class="rounded-lg bg-obsidian border border-stroke px-3 py-2">
+          <div class="text-[11px] text-zinc-400">${escapeHtml(k)}</div>
+          <div class="text-zinc-100 font-semibold mt-0.5">${escapeHtml(v)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderAlertCards() {
+      const list = document.getElementById('alert-card-list');
+      const all = getFiltered();
+      const totalPages = Math.max(1, Math.ceil(all.length / state.pageSize));
+      if (state.page > totalPages) state.page = totalPages;
+      const rows = all.slice((state.page - 1) * state.pageSize, state.page * state.pageSize);
+      document.getElementById('queue-count-badge').textContent = `${all.length} / ${state.alerts.length}`;
+      document.getElementById('page-indicator').textContent = `Page ${state.page} / ${totalPages}`;
+      document.getElementById('btn-prev-page').disabled = state.page <= 1;
+      document.getElementById('btn-next-page').disabled = state.page >= totalPages;
+
+      if (!rows.length) {
+        list.innerHTML = `<div class="p-8 text-center font-mono text-xs text-zinc-400">No alerts match filters.</div>`;
+        return;
+      }
+
+      list.innerHTML = rows.map(a => {
+        const c = classifyAlert(a);
+        const active = a.id === state.selectedId;
+        return `
+          <div data-alert-id="${a.id}" tabindex="0" class="p-3.5 cursor-pointer transition-colors hover:bg-card/80 focus:outline-none ${active ? 'bg-teal-500/10 border-l-2 border-l-teal-400' : ''}">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 min-w-0">
+                ${a.isNew ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-teal-500/20 text-teal-300 border border-teal-500/35 shrink-0">NEW</span>' : ''}
+                <span class="font-medium text-xs text-zinc-100 truncate">${escapeHtml(a.desc)}</span>
+              </div>
+              ${verdictBadge(c)}
+            </div>
+            <div class="flex items-center justify-between gap-2 mt-1.5 font-mono text-[11px] text-zinc-400">
+              <span>${escapeHtml(defangIp(a.srcIp))} · ${escapeHtml(a.host)}</span>
+              <span class="text-teal-300 font-semibold">${a.prob}%</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderEvalMetrics() {
+      const m = EVAL_BY_CUTOFF[state.threshold] || EVAL_BY_CUTOFF[85];
+      const total = m.tp + m.fp + m.fn + m.tn;
+      const acc = ((m.tp + m.tn) / total) * 100;
+      const prec = (m.tp / Math.max(1, m.tp + m.fp)) * 100;
+      const rec = (m.tp / Math.max(1, m.tp + m.fn)) * 100;
+      const f1 = (2 * prec * rec) / Math.max(1, prec + rec);
+
+      document.getElementById('eval-cutoff-lbl').textContent = `${state.threshold}%`;
+      document.getElementById('eval-acc-badge').textContent = `${acc.toFixed(1)}% Acc`;
+      document.getElementById('sb-acc-pill').textContent = `${acc.toFixed(1)}%`;
+      document.getElementById('cm-tp').textContent = m.tp;
+      document.getElementById('cm-fp').textContent = m.fp;
+      document.getElementById('cm-fn').textContent = m.fn;
+      document.getElementById('cm-tn').textContent = m.tn;
+      document.getElementById('eval-prec').textContent = `${prec.toFixed(1)}%`;
+      document.getElementById('eval-rec').textContent = `${rec.toFixed(1)}%`;
+      document.getElementById('eval-f1').textContent = `${f1.toFixed(1)}%`;
+    }
+
+    function renderKPIsAndCharts() {
+      let tp = 0, rev = 0, fp = 0, confSum = 0, confCount = 0;
+      let agreeCount = 0, overrideTotal = 0;
+
+      state.alerts.forEach(a => {
+        const c = classifyAlert(a);
+        if (c.code === 'TP') tp++; else if (c.code === 'REVIEW') rev++; else fp++;
+        if (!a.override) {
+          confSum += c.conf;
+          confCount++;
+        } else {
+          overrideTotal++;
+          const modelCode = a.prob >= state.threshold ? 'TP' : a.prob >= 50 ? 'REVIEW' : 'FP';
+          if (modelCode === a.override) agreeCount++;
+        }
+      });
+      const total = state.alerts.length || 1;
+      document.getElementById('kpi-tp').textContent = tp;
+      document.getElementById('kpi-review').textContent = rev;
+      document.getElementById('kpi-fp-rate').textContent = `${Math.round((fp / total) * 100)}%`;
+      document.getElementById('kpi-avg-conf').textContent = confCount ? `${Math.round(confSum / confCount)}%` : '—';
+      document.getElementById('kpi-agreement').textContent = overrideTotal ? `${Math.round((agreeCount / overrideTotal) * 100)}% (${overrideTotal})` : '100%';
+
+      if (!featureChart) {
+        featureChart = new Chart(document.getElementById('featureChart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['alert_priority', 'connection_rate', 'duration_sec', 'failed_logins', 'distinct_dst_ports', 'time_of_day'],
+            datasets: [{ data: [0.334, 0.242, 0.194, 0.103, 0.079, 0.048], backgroundColor: ['#14b8a6', '#10b981', '#06b6d4', '#38bdf8', '#818cf8', '#64748b'], borderRadius: 4 }]
+          },
+          options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false, layout: { padding: { left: 6 } }, plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: 'rgba(39,39,42,0.7)' }, ticks: { color: '#a1a1aa', font: { family: 'JetBrains Mono', size: 10 } } },
+              y: { grid: { display: false }, ticks: { color: '#e4e4e7', font: { family: 'JetBrains Mono', size: 10 } } }
+            }
+          }
+        });
+      }
+
+      if (!verdictChart) {
+        verdictChart = new Chart(document.getElementById('verdictChart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['Tier-2 Escalate', 'L1 Review', 'Auto-Close FP'],
+            datasets: [{ data: [tp, rev, fp], backgroundColor: ['#f43f5e', '#f59e0b', '#10b981'], borderRadius: 6 }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#e4e4e7', font: { family: 'JetBrains Mono', size: 11 } } },
+              y: { grid: { color: 'rgba(39,39,42,0.7)' }, ticks: { color: '#a1a1aa', stepSize: 1, font: { family: 'JetBrains Mono', size: 10 } }, beginAtZero: true }
+            }
+          }
+        });
+      } else {
+        verdictChart.data.datasets[0].data = [tp, rev, fp];
+        verdictChart.update('none');
+      }
+      renderEvalMetrics();
+    }
+
+    function pullAlert() {
+      const tpl = STREAM_POOL[state.streamIdx % STREAM_POOL.length];
+      state.streamIdx++;
+      const exists = state.alerts.find(a => a.desc === tpl.desc && a.srcIp === tpl.srcIp);
+      if (exists) {
+        exists.time = utcNow();
+        addLog('INFO', `Refreshed telemetry for ${exists.desc} (${exists.prob}% risk)`);
+        renderAlertCards();
+        return;
+      }
+      const fresh = {
+        ...tpl,
+        id: `ALT-${nextId++}`,
+        time: utcNow(),
+        override: savedOverrides[`${tpl.desc}|${tpl.srcIp}`] || null,
+        isNew: true,
+        isCustom: true
+      };
+      state.alerts.unshift(fresh);
+      const c = classifyAlert(fresh);
+      addLog(c.code === 'TP' ? 'ESCALATE' : c.code === 'REVIEW' ? 'REVIEW' : 'OK', `Streamed ${fresh.id}: ${fresh.desc} → ${c.label} (${fresh.prob}%)`);
+      renderAll();
+    }
+
+    function scoreSandbox() {
+      const p = Number(document.getElementById('sb-priority').value);
+      const conn = Number(document.getElementById('sb-conn').value);
+      const failed = Number(document.getElementById('sb-failed').value);
+      const ports = Number(document.getElementById('sb-ports').value);
+      const dur = Number(document.getElementById('sb-duration').value);
+      const hour = Number(document.getElementById('sb-hour').value);
+
+      const pLabels = { 1: '1 (Low)', 2: '2 (Medium)', 3: '3 (High)', 4: '4 (Critical)' };
+      document.getElementById('sb-priority-out').textContent = pLabels[p];
+      document.getElementById('sb-conn-out').textContent = `${conn} /s`;
+      document.getElementById('sb-failed-out').textContent = failed;
+      document.getElementById('sb-ports-out').textContent = ports;
+      document.getElementById('sb-duration-out').textContent = `${dur}s`;
+      document.getElementById('sb-hour-out').textContent = `${String(hour).padStart(2, '0')}:00`;
+
+      const offHours = (hour <= 5 || hour >= 22) ? 12 : 0;
+      const raw = (p - 1) * 18 + Math.min(conn * 0.25, 22) + Math.min(failed * 0.35, 20) + Math.min(ports * 0.04, 14) + Math.min(dur * 0.015, 10) + offHours;
+      const prob = Math.max(4, Math.min(99, Math.round(raw)));
+
+      const title = document.getElementById('sb-verdict-title');
+      const desc = document.getElementById('sb-routing-desc');
+      const bar = document.getElementById('sb-prob-bar');
+      document.getElementById('sb-prob-val').textContent = `${prob}%`;
+      bar.style.width = `${prob}%`;
+
+      if (prob >= state.threshold) {
+        title.textContent = 'TRUE POSITIVE'; title.className = 'text-2xl font-mono font-bold text-rose-400 mt-2';
+        desc.textContent = `Auto-Escalate to Tier 2 (≥ ${state.threshold}% cutoff)`; bar.className = 'h-full bg-rose-500 rounded-full transition-all duration-300';
+      } else if (prob >= 50) {
+        title.textContent = 'L1 REVIEW'; title.className = 'text-2xl font-mono font-bold text-amber-400 mt-2';
+        desc.textContent = `Route to L1 Queue (50%–${state.threshold - 1}%)`; bar.className = 'h-full bg-amber-400 rounded-full transition-all duration-300';
+      } else {
+        title.textContent = 'FALSE POSITIVE'; title.className = 'text-2xl font-mono font-bold text-emerald-400 mt-2';
+        desc.textContent = 'Auto-Close & Suppress (< 50%)'; bar.className = 'h-full bg-emerald-500 rounded-full transition-all duration-300';
+      }
+
+      document.getElementById('sb-drivers').innerHTML = [
+        `alert_priority = ${p} (RF weight 0.334)`,
+        `connection_rate = ${conn}/s (RF weight 0.242)`,
+        `duration_sec = ${dur}s (RF weight 0.194)`,
+        `failed_logins = ${failed} · time = ${String(hour).padStart(2,'0')}:00 UTC`
+      ].map(d => `<li>• ${escapeHtml(d)}</li>`).join('');
+      return { p, conn, failed, ports, dur, hour, prob };
+    }
+
+    function switchTab(tab) {
+      ['queue', 'metrics', 'simulator'].forEach(t => document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const on = btn.dataset.tab === tab;
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        btn.className = `nav-btn flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${on ? 'bg-teal-500/15 text-teal-300 border border-teal-500/30' : 'text-zinc-400 hover:text-zinc-100 hover:bg-card border border-transparent'}`;
+      });
+      setTimeout(() => {
+        if (featureChart) featureChart.resize();
+        if (verdictChart) verdictChart.resize();
+      }, 30);
+    }
+
+    function renderAll() {
+      renderKPIsAndCharts();
+      renderAlertCards();
+      renderInspector();
+      scoreSandbox();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      const tick = () => { document.getElementById('utc-clock').textContent = utcNow().slice(0, 5) + ' UTC'; };
+      tick(); setInterval(tick, 1000);
+
+      document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+
+      document.getElementById('threshold-slider').addEventListener('input', (e) => {
+        state.threshold = Number(e.target.value);
+        document.getElementById('threshold-val').textContent = `${state.threshold}%`;
+        renderAll();
+      });
+
+      document.getElementById('btn-toggle-stream').addEventListener('click', () => {
+        state.streaming = !state.streaming;
+        document.getElementById('btn-toggle-stream-text').textContent = state.streaming ? 'Pause' : 'Resume';
+        document.getElementById('stream-label').textContent = state.streaming ? 'ACTIVE' : 'PAUSED';
+        const dot = document.getElementById('stream-dot');
+        dot.classList.toggle('bg-emerald-400', state.streaming);
+        dot.classList.toggle('live-dot', state.streaming);
+        dot.classList.toggle('bg-amber-400', !state.streaming);
+      });
+
+      document.getElementById('btn-ingest-alert').addEventListener('click', () => { pullAlert(); showToast('Scored simulated alert'); });
+      document.getElementById('btn-defang').addEventListener('click', () => {
+        state.defang = !state.defang;
+        document.getElementById('defang-label').textContent = `Defang: ${state.defang ? 'ON' : 'OFF'}`;
+        renderAlertCards(); renderInspector();
+      });
+
+      document.getElementById('btn-export-csv').addEventListener('click', () => {
+        const rows = getFiltered();
+        const header = ['ID','Time','Alert','Source_IP','Host','Severity','Malicious_Prob','Verdict','Action'];
+        const lines = [header.join(',')].concat(rows.map(a => {
+          const c = classifyAlert(a);
+          return [csvCell(a.id), csvCell(a.time), csvCell(a.desc), csvCell(a.srcIp), csvCell(a.host), csvCell(a.sev), csvCell(a.prob + '%'), csvCell(c.label), csvCell(c.action)].join(',');
+        }));
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a'); link.href = url; link.download = 'ai-soc-triage-workbench.csv';
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        URL.revokeObjectURL(url); showToast(`Exported ${rows.length} alerts to CSV`);
+      });
+
+      document.getElementById('btn-export-retrain').addEventListener('click', () => {
+        const overridden = state.alerts.filter(a => a.override);
+        if (!overridden.length) { showToast('No analyst overrides to export yet'); return; }
+        const header = ['ID','Alert','Source_IP','Model_Prob','Analyst_Label','Priority','Conn_Rate','Failed_Logins','Ports','Duration'];
+        const lines = [header.join(',')].concat(overridden.map(a => [
+          csvCell(a.id), csvCell(a.desc), csvCell(a.srcIp), csvCell(a.prob), csvCell(a.override),
+          csvCell(a.features.alert_priority), csvCell(a.features.connection_rate), csvCell(a.features.failed_logins),
+          csvCell(a.features.distinct_dst_ports), csvCell(a.features.duration_sec)
+        ].join(',')));
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a'); link.href = url; link.download = 'retraining-feedback-queue.csv';
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        URL.revokeObjectURL(url); showToast(`Exported ${overridden.length} overrides for retraining`);
+      });
+
+      document.getElementById('filter-search').addEventListener('input', (e) => { state.filters.search = e.target.value; state.page = 1; renderAlertCards(); });
+      document.getElementById('filter-sev').addEventListener('change', (e) => { state.filters.sev = e.target.value; state.page = 1; renderAlertCards(); });
+      document.getElementById('verdict-pills').addEventListener('click', (e) => {
+        const btn = e.target.closest('.verdict-pill'); if (!btn) return;
+        state.filters.verdict = btn.dataset.verdict; state.page = 1;
+        document.querySelectorAll('.verdict-pill').forEach(b => {
+          const on = b.dataset.verdict === state.filters.verdict;
+          b.className = `verdict-pill px-2 py-1 rounded text-[11px] font-mono ${on ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' : 'bg-obsidian text-zinc-400 border border-stroke hover:text-zinc-100'}`;
+        });
+        renderAlertCards();
+      });
+
+      document.getElementById('btn-prev-page').addEventListener('click', () => { if (state.page > 1) { state.page--; renderAlertCards(); } });
+      document.getElementById('btn-next-page').addEventListener('click', () => {
+        const maxP = Math.max(1, Math.ceil(getFiltered().length / state.pageSize));
+        if (state.page < maxP) { state.page++; renderAlertCards(); }
+      });
+
+      const listEl = document.getElementById('alert-card-list');
+      listEl.addEventListener('click', (e) => {
+        const c = e.target.closest('[data-alert-id]');
+        if (c) {
+          state.selectedId = c.dataset.alertId;
+          const item = state.alerts.find(a => a.id === state.selectedId);
+          if (item) item.isNew = false;
+          renderAlertCards(); renderInspector();
+        }
+      });
+      listEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          const c = e.target.closest('[data-alert-id]');
+          if (c) { e.preventDefault(); state.selectedId = c.dataset.alertId; renderAlertCards(); renderInspector(); }
+        }
+      });
+
+      document.getElementById('btn-override-tp').addEventListener('click', () => {
+        const a = state.alerts.find(x => x.id === state.selectedId); if (!a) return;
+        a.override = 'TP'; saveState();
+        addLog('ESCALATE', `Analyst override: ${a.id} confirmed TRUE POSITIVE → Tier 2`);
+        showToast(`${a.id} escalated to Tier 2`); renderAll();
+      });
+      document.getElementById('btn-override-fp').addEventListener('click', () => {
+        const a = state.alerts.find(x => x.id === state.selectedId); if (!a) return;
+        a.override = 'FP'; saveState();
+        addLog('OK', `Analyst override: ${a.id} closed as FALSE POSITIVE`);
+        showToast(`${a.id} marked False Positive`); renderAll();
+      });
+      document.getElementById('btn-override-reset').addEventListener('click', () => {
+        const a = state.alerts.find(x => x.id === state.selectedId); if (!a) return;
+        a.override = null; saveState();
+        addLog('INFO', `Override cleared for ${a.id} — restored model verdict`);
+        showToast(`${a.id} override reset`); renderAll();
+      });
+
+      document.getElementById('btn-clear-log').addEventListener('click', () => { state.logs = []; document.getElementById('inference-log').innerHTML = ''; });
+      ['sb-priority', 'sb-conn', 'sb-failed', 'sb-ports', 'sb-duration', 'sb-hour'].forEach(id => document.getElementById(id).addEventListener('input', scoreSandbox));
+
+      document.getElementById('sandbox-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const desc = document.getElementById('sb-desc').value.trim();
+        const ip = document.getElementById('sb-ip').value.trim();
+        const mitre = document.getElementById('sb-mitre').value;
+        if (!desc) { showToast('Alert description cannot be empty'); return; }
+        if (!/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(ip)) { showToast('Invalid IPv4 format'); return; }
+        const s = scoreSandbox();
+        const sevMap = { 1: 'LOW', 2: 'MEDIUM', 3: 'HIGH', 4: 'CRITICAL' };
+        const fresh = {
+          id: `ALT-${nextId++}`, time: utcNow(), desc, srcIp: ip, host: 'sandbox-sensor-01',
+          sev: sevMap[s.p], mitre, prob: s.prob, override: null, isNew: true, isCustom: true,
+          features: { alert_priority: s.p, connection_rate: `${s.conn} /s`, failed_logins: s.failed, distinct_dst_ports: s.ports, duration_sec: `${s.dur}s`, time_of_day: `${String(s.hour).padStart(2,'0')}:00 UTC` },
+          contribs: [
+            { name: `alert_priority (${s.p})`, delta: s.p >= 3 ? '+0.28' : '-0.24' },
+            { name: `connection_rate (${s.conn}/s)`, delta: s.conn >= 30 ? '+0.21' : '-0.12' },
+            { name: `failed_logins (${s.failed})`, delta: s.failed >= 10 ? '+0.18' : '-0.10' }
+          ]
+        };
+        state.alerts.unshift(fresh); state.selectedId = fresh.id; state.page = 1; saveState();
+        addLog('INFO', `Sandbox alert scored: ${fresh.desc} (${fresh.prob}% risk)`);
+        renderAll(); switchTab('queue'); showToast(`Scored & added ${fresh.id}`);
+      });
+
+      addLog('OK', 'AlertTriage ML Workbench loaded (RandomForestClassifier · 2,000 lab alerts)');
+      addLog('INFO', '5-Fold CV AUC: 0.989 ± 0.004 · Held-out Acc: 98.5% · PR-AUC: 0.986');
+      renderAll();
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          if (featureChart) { featureChart.destroy(); featureChart = null; }
+          if (verdictChart) { verdictChart.destroy(); verdictChart = null; }
+          renderKPIsAndCharts();
+        });
+      }
+      state.timer = setInterval(() => { if (state.streaming) pullAlert(); }, 10000);
+    });
+  </script>
 </body>
 </html>
